@@ -1,0 +1,18 @@
+Package: greatr
+Version: 0.1-1
+Date: 2018-09-25 23:10:58
+Title: GREATR: multi-samples analysis of cis-regulatory regions.
+Authors@R: c(person("Guillaume", "Charbonnier", role = c("aut", "cre"),
+                     email = "guillaume.charbonnier@outlook.com"))
+Author: Joe Developer [aut, cre],
+  Pat Developer [aut],
+  A. User [ctb]
+Maintainer: Joe Developer <Joe.Developer@some.domain.net>
+Depends: R (>= 3.1.0)
+Suggests: 
+Description: A (one paragraph) description of what
+  the package does and why it may be useful.
+License: GPL (>= 2)
+URL: https://www.r-project.org, http://www.another.url
+BugReports: https://pkgname.bugtracker.url
+RoxygenNote: 6.0.1

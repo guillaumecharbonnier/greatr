@@ -1,0 +1,27 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-docopt
+  - r-devtools 
+  - r-roxygen2
+  - r-rcolorbrewer
+  - r-ggpubr
+  - r-reshape
+  - bioconductor-rtracklayer
+  - bioconductor-rgreat
+    #  #- r-dbscan # I want to try optics clustering.
+    #  #- r-crayon # Trying colored output in terminal.
+    #  #- bioconductor-scater # calculateTPM
+    #  - r-rmarkdown
+    #  - pandoc=1.19 #requirement to render R Markdown.
+    #  - r-codetools #requirement to avoid error after first R chunk during R Markdown rendering.
+    #  - bioconductor-edger
+    #  - r-data.table
+    #  - r-stringr
+    #  - r-fastcluster # provides a replacement to R-base hclust to cluster more than 65536 rows.
+    #  - r-factoextra
+    #  - r-fpc # I want to try pamk
+    #
+
