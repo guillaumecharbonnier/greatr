@@ -7,7 +7,7 @@
 "A script to produces heatmaps from multiple samples automated queries to GREAT. 
 
 Usage: 
-    GREATR.R [-i <indir>] [-f <files>] [-o <outdir>] [-a <assembly>] [-g <ontology>] [-m <filterMetrics>] [-s <filterGreaterLowerThans>] [-t <filterThresholds>] [-r <subsampleReplicates>]
+    greatr [-i <indir>] [-f <files>] [-o <outdir>] [-a <assembly>] [-g <ontology>] [-m <filterMetrics>] [-s <filterGreaterLowerThans>] [-t <filterThresholds>] [-r <subsampleReplicates>]
 
 Options:
     -i <indir>      Input directory. [default: .]
@@ -21,7 +21,6 @@ Options:
     -t <filterThresholds>   Vector of thresholds to apply to filterMetrics. Values matching treshold are kept, i.e. '<=' and '>=' are used for comparison. [default: 2,0.05,0.05,10]
     " -> doc
 
-
 # -----------------------------------------------------------------------------
 # Arg parsing
 # -----------------------------------------------------------------------------
@@ -32,12 +31,12 @@ opts$m <- unlist(strsplit(x=opts$m, split=','))
 opts$s <- unlist(strsplit(x=opts$s, split=','))
 opts$t <- as.numeric(unlist(strsplit(x=opts$t, split=',')))
 print(opts)
+
 ## -----------------------------------------------------------------------------
 ## Function calling
 ## -----------------------------------------------------------------------------
 
 library(greatr)
-#source('opt/greatr/R/great_heatmap.R')
 plot_facet_heatmaps(indir=opts$i,
 #make_preset_heatmaps(indir=opts$i,
                      files=opts$f,
