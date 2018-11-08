@@ -13,6 +13,7 @@ Suggests:
 Imports:
 	tools,
 	rtracklayer,
+	GenomicRanges,
 	rGREAT,
 	ggplot2,
 	ggpubr,

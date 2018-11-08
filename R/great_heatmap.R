@@ -118,21 +118,21 @@ load_beds <- function(outdir,
     }
     paths <- file.path(indir,files)
     if (smartLabels){
-        labels <- file_path_sans_ext(basename(paths))
+        labels <- tools::file_path_sans_ext(basename(paths))
     }
     print(paths)
     names(paths) <- labels
     print(paths)
     beds <- list()
     for (sample in names(paths)){
-        beds[sample] <- import(con=as.character(paths[sample]), format='BED', genome=assembly)
+        beds[sample] <- rtracklayer::import(con=as.character(paths[sample]), format='BED', genome=assembly)
         # GREAT does not like non-integer score
         if (!is.null(beds[[sample]]@elementMetadata$score)){
             beds[[sample]]@elementMetadata$score <- round(beds[[sample]]@elementMetadata$score)
         }
         #beds[sample] <- read.table(as.character(paths[sample]), sep='\t')[,1:3]
     }
-    beds <- GRangesList(beds)
+    beds <- GenomicRanges::GRangesList(beds)
     return(beds)
 }
 
@@ -199,8 +199,8 @@ query_great <- function(beds,
         # Avoid redoing analysis if already done and loaded from save file.
         if (!sample %in% names(enrichment_tables)){
             print(paste0('Running GREAT analysis for ',sample,'.'))
-            job = submitGreatJob(beds[[sample]], species = assembly, request_interval=5)
-            enrichment_tables[[sample]] = getEnrichmentTables(job, ontology = ontologies)
+            job = rGREAT::submitGreatJob(beds[[sample]], species = assembly, request_interval=5)
+            enrichment_tables[[sample]] = rGREAT::getEnrichmentTables(job, ontology = ontologies)
         }
     }
     if (saveTables){
@@ -571,32 +571,32 @@ plot_heatmap <- function(data_for_heatmap,
         # Skipping plot if it already exists.
         #if (! (file.exists(outfile) & skipIfOutfileExists){
 
-            melted <- melt(data_for_heatmap)
+            melted <- reshape::melt(data_for_heatmap)
             # loose rownames:
             #dm <- apply(data.matrix(dm), 2, as.numeric)
             height <- min(4+0.1*nr,100)
             width <- min(nc*0.2+0.1*max(nchar(as.character(data_for_heatmap$label))),100)
 
-            p <- ggplot(data = melted, aes(x = variable, y = label))
-            p <- p + geom_tile(aes(fill = value))
-            p <- p + geom_text(aes(label = round(value, 1)))
+            p <- ggplot2::ggplot(data = melted, ggplot2::aes(x = variable, y = label))
+            p <- p + ggplot2::geom_tile(ggplot2::aes(fill = value))
+            p <- p + ggplot2::geom_text(ggplot2::aes(label = round(value, 1)))
 
-            p <- p + scale_fill_gradient(low = "white", high = "darkblue")
+            p <- p + ggplot2::scale_fill_gradient(low = "white", high = "darkblue")
             # Does not work:
             # Error: Continuous value supplied to discrete scale
             #p <- p + scale_fill_brewer(palette = palette_name)
-            p <- p + theme(axis.text.x  = element_text(angle=320, vjust=1, hjust=0),
+            p <- p + ggplot2::theme(axis.text.x  = ggplot2::element_text(angle=320, vjust=1, hjust=0),
                            legend.position = "bottom")
-            p <- p + scale_y_discrete(position = "right")
+            p <- p + ggplot2::scale_y_discrete(position = "right")
 
             #p <- p + scale_fill_gradientn(limits=quantile(dm,c(0.01,0.99)))
-            p <- p + xlab('Samples')
-            p <- p + ylab('Gene Ontology Terms')
-            p <- p + labs(fill = fillLabel)
+            p <- p + ggplot2::xlab('Samples')
+            p <- p + ggplot2::ylab('Gene Ontology Terms')
+            p <- p + ggplot2::labs(fill = fillLabel)
             if (samplesAsRows){
-                p <- p + coord_flip()
+                p <- p + ggplot2::coord_flip()
             }
-            ggsave(filename=outpath, plot=p, width=width, height=height, limitsize=F)
+            ggplot2::ggsave(filename=outpath, plot=p, width=width, height=height, limitsize=F)
         #}
     }
     return(p)
@@ -627,11 +627,11 @@ plot_facet_heatmaps <- function(indir='.',
                                            subsampleReplicates=subsampleReplicates,
                                            showedMetric='Binom_Fold_Enrichment',
                                            transformation='')
-    melted <- melt(great_heatmap$data_for_heatmap$metric)
-    melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
+    melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted$metric <- 'Binom Fold\nEnrichment'
-    melted$scaled <- rescale(melted$value)
+    melted$scaled <- scales::rescale(melted$value)
 
     #After the first heatmap we can get an idea of the dimension of the final plot
     nr <- nrow(great_heatmap$data_for_heatmap)
@@ -664,11 +664,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='Binom_Fold_Enrichment',
                        transformation='Zscore')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- 'Zscore by GO term\nBinom Fold Enrich'
-    append_to_melted$scaled <- rescale(append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     
@@ -680,11 +680,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='Binom_Rank',
                        transformation='')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- 'Binom Rank'
-    append_to_melted$scaled <- rescale(-append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(-append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     great_heatmap <- make_great_heatmap(enrichmentTables=great_heatmap$enrichmentTables, 
@@ -695,11 +695,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='Post_Filter_Binom_Rank',
                        transformation='')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- 'Post-Filter\nBinom Rank'
-    append_to_melted$scaled <- rescale(-append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(-append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     great_heatmap <- make_great_heatmap(enrichmentTables=great_heatmap$enrichmentTables, 
@@ -710,11 +710,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='Binom_Adjp_BH',
                        transformation='mlog10')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- 'mlog10 Binom\nAdjp_BH'
-    append_to_melted$scaled <- rescale(append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     great_heatmap <- make_great_heatmap(enrichmentTables=great_heatmap$enrichmentTables, 
@@ -725,11 +725,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='Hyper_Adjp_BH',
                        transformation='mlog10')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- 'mlog10 Hyper\nAdjp_BH'
-    append_to_melted$scaled <- rescale(append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     great_heatmap <- make_great_heatmap(enrichmentTables=great_heatmap$enrichmentTables, 
@@ -740,11 +740,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='sum_Norm_mlog10_Binom_Bonf_PValue',
                        transformation='x100')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- '% of sum of mlog10\nBonf PValue in sample'
-    append_to_melted$scaled <- rescale(append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     great_heatmap <- make_great_heatmap(enrichmentTables=great_heatmap$enrichmentTables, 
@@ -755,11 +755,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='sum_Signif_Norm_mlog10_Binom_Bonf_PValue',
                        transformation='x100')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- '% of sum of signif mlog10\nBonf PValue in sample'
-    append_to_melted$scaled <- rescale(append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     great_heatmap <- make_great_heatmap(enrichmentTables=great_heatmap$enrichmentTables, 
@@ -770,11 +770,11 @@ plot_facet_heatmaps <- function(indir='.',
                        filterThresholds=filterThresholds,
                        showedMetric='sum_Displayed_Norm_mlog10_Binom_Bonf_PValue',
                        transformation='x100')
-    append_to_melted <- melt(great_heatmap$data_for_heatmap$metric)
+    append_to_melted <- reshape::melt(great_heatmap$data_for_heatmap$metric)
     append_to_melted$metric <- '% of sum of displayed mlog10\nBonf PValue in sample'
-    append_to_melted$scaled <- rescale(append_to_melted$value)
-    append_to_melted$signif_binom <- melt(great_heatmap$data_for_heatmap$signif_binom)$value
-    append_to_melted$signif_hyper <- melt(great_heatmap$data_for_heatmap$signif_hyper)$value
+    append_to_melted$scaled <- scales::rescale(append_to_melted$value)
+    append_to_melted$signif_binom <- reshape::melt(great_heatmap$data_for_heatmap$signif_binom)$value
+    append_to_melted$signif_hyper <- reshape::melt(great_heatmap$data_for_heatmap$signif_hyper)$value
     melted <- rbind(melted,append_to_melted)
 
     n_heatmaps <- 4
@@ -832,9 +832,9 @@ plot_melted_data <- function(melted,
     height_bottom <- 0.2 + 0.15 * n_char_samples
     height <- height_top + height_heatmap + height_bottom 
     
-    p <- ggplot(data = melted, aes(x = variable, y = label))
-    p <- p + geom_tile(aes(fill = scaled))
-    p <- p + geom_text(aes(color = scaled,
+    p <- ggplot2::ggplot(data = melted, ggplot2::aes(x = variable, y = label))
+    p <- p + ggplot2::geom_tile(ggplot2::aes(fill = scaled))
+    p <- p + ggplot2::geom_text(ggplot2::aes(color = scaled,
                            label = round(value, 1),
                            fontface = ifelse(signif_hyper,
                                              ifelse(signif_binom,
@@ -847,7 +847,7 @@ plot_melted_data <- function(melted,
                            )
     )
     if ('metric' %in% colnames(melted)){
-        p <- p + facet_grid(cols = vars(metric))
+        p <- p + ggplot2::facet_grid(cols = ggplot2::vars(metric))
     }
     #p <- p + scale_fill_gradient(low = "white", high = "darkblue", guide=FALSE)
     #p <- p + scale_color_gradient2(low = "black", mid="yellow", high = "white", midpoint=0.5, guide=FALSE)
@@ -855,21 +855,21 @@ plot_melted_data <- function(melted,
     #p <- p + scale_color_gradientn(colors=c('#FFBF00','#FFBF01','#FFD65C','#FFEFBE','#FFFEFB'),guide=FALSE)
     #p <- p + scale_fill_gradientn(colors=c('#CACACA','#667F93','#2A506D','#052B48','#001322'),guide=FALSE)
     #p <- p + scale_color_gradientn(colors=c('#351F00','#704000','#AA7A3A','#E4C499','#FFFFFF'),guide=FALSE)
-    p <- p +  scale_fill_gradientn(colors=c('#FFFFFF','#C3DAFF','#3986FF','#00307D','#00060E'),guide=FALSE)
-    p <- p + scale_color_gradientn(colors=c('#160E00','#160E00','#FFB025','#FFE7BD','#FFFFFF'),guide=FALSE)
+    p <- p + ggplot2::scale_fill_gradientn(colors=c('#FFFFFF','#C3DAFF','#3986FF','#00307D','#00060E'),guide=FALSE)
+    p <- p + ggplot2::scale_color_gradientn(colors=c('#160E00','#160E00','#FFB025','#FFE7BD','#FFFFFF'),guide=FALSE)
 
     # Does not work:
     # Error: Continuous value supplied to discrete scale
     #p <- p + scale_fill_brewer(palette = palette_name)
-    p <- p + theme(axis.text.x  = element_text(angle=320, vjust=1, hjust=0),
+    p <- p + ggplot2::theme(axis.text.x  = ggplot2::element_text(angle=320, vjust=1, hjust=0),
                    legend.position = "bottom")
-    p <- p + scale_y_discrete(position = "right")
+    p <- p + ggplot2::scale_y_discrete(position = "right")
 
     #p <- p + scale_fill_gradientn(limits=quantile(dm,c(0.01,0.99)))
-    p <- p + xlab('Samples')
-    p <- p + ylab('Gene Ontology Terms')
+    p <- p + ggplot2::xlab('Samples')
+    p <- p + ggplot2::ylab('Gene Ontology Terms')
     #p <- p + labs(fill = fillLabel)
-    ggsave(filename=outpath,
+    ggplot2::ggsave(filename=outpath,
            plot=p, 
            width=width,
            height=height, 
@@ -1205,7 +1205,7 @@ plot_melted_data <- function(melted,
 #
 #
 #
-#                            melted <- melt(dm)
+#                            melted <- reshape::melt(dm)
 #                            # loose rownames:
 #                            #dm <- apply(data.matrix(dm), 2, as.numeric)
 #
