@@ -811,6 +811,8 @@ plot_facet_heatmaps <- function(indir='.',
 #' Additionaly, a column "metric" can be used to plot in facets (one column for each metric) multiple metrics
 #' TODO: A column "ontology" should be addede to plot in facets (one row for each ontology).
 #' A column "signif_binom" and "signif_hyper" containing TRUE/FALSE can be added to bold/italicize values when sample/goTerm pair pass these tests. 
+#'
+#' @export
 plot_melted_data <- function(melted,
                              outpath){
     n_samples <- length(unique(melted$variable))
@@ -1264,6 +1266,8 @@ plot_melted_data <- function(melted,
 
 
 #' Make multiple heatmaps with standard metrics and their transformation.
+#'
+#' @export
 make_preset_heatmaps <- function(indir='.',
                                  outdir='.',
                                  files=NULL,

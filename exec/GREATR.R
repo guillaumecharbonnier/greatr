@@ -36,7 +36,8 @@ print(opts)
 ## Function calling
 ## -----------------------------------------------------------------------------
 
-source('src/r/pkg/gcfun/R/great_heatmap.R')
+library(greatr)
+#source('opt/greatr/R/great_heatmap.R')
 plot_facet_heatmaps(indir=opts$i,
 #make_preset_heatmaps(indir=opts$i,
                      files=opts$f,
