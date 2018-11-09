@@ -234,6 +234,10 @@ compute_additional_metrics <- function(enrichment_table,
     enrichment_table$Hyper_Rank <- rank(enrichment_table$Hyper_Raw_PValue)
     enrichment_table$Binom_Bonf_PValue <- p.adjust(enrichment_table$Binom_Raw_PValue, method='bonferroni')
     enrichment_table$Hyper_Bonf_PValue <- p.adjust(enrichment_table$Hyper_Raw_PValue, method='bonferroni')
+    # I think before v1.12, rGREAT API had by default the adjusted p-value as these colnames.
+    # It is computed here in case recent version is used.
+    enrichment_table$Binom_Adjp_BH <- p.adjust(enrichment_table$Binom_Raw_PValue, method='BH')
+    enrichment_table$Hyper_Adjp_BH <- p.adjust(enrichment_table$Hyper_Raw_PValue, method='BH')
     enrichment_table$mlog10_Binom_Bonf_PValue <- -log10(enrichment_table$Binom_Bonf_PValue)
     enrichment_table$mlog10_Hyper_Bonf_PValue <- -log10(enrichment_table$Hyper_Bonf_PValue)
 
