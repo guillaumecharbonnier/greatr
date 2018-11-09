@@ -851,7 +851,7 @@ plot_melted_data <- function(melted,
                            )
     )
     if ('metric' %in% colnames(melted)){
-        p <- p + ggplot2::facet_grid(cols = ggplot2::vars(metric))
+        p <- p + ggplot2::facet_grid(. ~ metric) #cols = ggplot2::vars(metric))
     }
     #p <- p + scale_fill_gradient(low = "white", high = "darkblue", guide=FALSE)
     #p <- p + scale_color_gradient2(low = "black", mid="yellow", high = "white", midpoint=0.5, guide=FALSE)
