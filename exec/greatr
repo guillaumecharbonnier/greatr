@@ -7,7 +7,7 @@
 "A script to produces heatmaps from multiple samples automated queries to GREAT. 
 
 Usage: 
-    greatr [-i <indir>] [-f <files>] [-o <outdir>] [-a <assembly>] [-g <ontology>] [-m <filterMetrics>] [-s <filterGreaterLowerThans>] [-t <filterThresholds>] [-r <subsampleReplicates>]
+    greatr [-i <indir>] [-f <files>] [-o <outdir>] [-a <assembly>] [-g <ontology>] [-l <slimList] [-m <filterMetrics>] [-s <filterGreaterLowerThans>] [-t <filterThresholds>] [-r <subsampleReplicates>]
 
 Options:
     -i <indir>      Input directory. [default: .]
@@ -15,6 +15,7 @@ Options:
     -o <outdir>     Output directory. [default: .]
     -a <assembly>   Assembly (hg19,mm9,mm10) [default: hg19]
     -g <ontology>   Ontology. Possible values and aliases (GOBP: GO Biological Process, MSDBP: MSigDB Pathway), [default: MSigDB Pathway]
+    -l <slimList>   A one-column file containing IDs to reduce analysis to in order to keep output readable and non-redundant.
     -r <subsampleReplicates>    Number of replicates for subsampling, no subsampling if unspecified.
     -m <filterMetrics>  Comma separated list of metrics to use for filtering. Defaults try to match GREAT default settings. See together <filterGreaterLowerThans> and <filterThresholds>. [default: Binom_Fold_Enrichment,Binom_Adjp_BH,Hyper_Adjp_BH,Post_Filter_Binom_Rank]
     -s <filterGreaterLowerThans>    Vector of 'lower' or 'greater' to apply fiterThresholds values to filterMetrics. [default: greater,lower,lower,lower]
@@ -46,6 +47,7 @@ plot_facet_heatmaps(indir=opts$i,
                      filterGreaterLowerThans=opts$s,
                      filterThresholds=opts$t,
                      subsampleReplicates=opts$r,
-                     ontology=opts$g)
+                     ontology=opts$g,
+                     slimList=opts$l)
 
 

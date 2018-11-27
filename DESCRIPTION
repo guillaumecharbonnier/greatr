@@ -4,12 +4,13 @@ Date: 2018-09-25 23:10:58
 Title: GREATR: multi-samples analysis of cis-regulatory regions.
 Authors@R: c(person("Guillaume", "Charbonnier", role = c("aut", "cre"),
                      email = "guillaume.charbonnier@outlook.com"))
-Author: Joe Developer [aut, cre],
+Author: Guillaume Charbonnier [aut, cre],
   Pat Developer [aut],
   A. User [ctb]
-Maintainer: Joe Developer <Joe.Developer@some.domain.net>
+Maintainer: Guillaume Charbonnier <guillaume.charbonnier@some.domain.net>
 Depends: R (>= 3.1.0)
 Suggests:
+    testthat
 Imports:
 	tools,
 	rtracklayer,
@@ -19,9 +20,8 @@ Imports:
 	ggpubr,
 	reshape,
 	scales
-Description: A (one paragraph) description of what
-  the package does and why it may be useful.
-License: GPL (>= 2)
+Description: greatr is a command-line tool allowing to automate multiple samples queries to GREAT using the rGREAT API to produce useful and nice-looking summary plots.
+License: MIT
 URL: https://www.r-project.org, http://www.another.url
 BugReports: https://pkgname.bugtracker.url
 RoxygenNote: 6.0.1
