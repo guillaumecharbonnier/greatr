@@ -4,17 +4,18 @@
 prepare_data_for_heatmap2 <- function(enrichmentTables,
                                       clusterTermsBy=NULL,
                                       goLabels=c('name','ID','ID-name')){
-    # 
-    d <- do.call(Map, c(f=rbind, enrichment_tables_with_additional_metrics))
+    d <- do.call(Map, c(f=rbind, enrichmentTables))
     d <- do.call(rbind, d)
     splitted_rownames <- matrix(unlist(strsplit(x=rownames(d), split='.', fixed=TRUE)), ncol=3, byrow=TRUE)
     colnames(splitted_rownames) <- c('Ontology', 'Sample','Index')
     d <- cbind(splitted_rownames, d)
     rownames(d) <- NULL
     
+    d$uniqueId <- paste(d$Ontology, d$ID, d$name, sep='_')
+    
     # Add pass_test info
-    pass_tests_for_all_samples <- reshape2::dcast(d, ID + name ~ Sample, value.var = "pass_tests")
-    samples_cols <- 3:ncol(pass_tests_for_all_samples)
+    pass_tests_for_all_samples <- reshape2::dcast(d, uniqueId ~ Sample, value.var = "pass_tests")
+    samples_cols <- 2:ncol(pass_tests_for_all_samples)
     pass_tests_for_all_samples$pass_tests_for_any_samples <- apply(pass_tests_for_all_samples[,samples_cols],
                                         MARGIN=1,
                                         FUN=any)
@@ -31,14 +32,13 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
     #}
     
     # Add Z-score transformation for Binom_Fold_Enrichment
-    tmp <- reshape2::dcast(d, ID + name ~ Sample, value.var = "Binom_Fold_Enrichment")
-    samples_cols <- 3:ncol(tmp)
+    tmp <- reshape2::dcast(d, uniqueId ~ Sample, value.var = "Binom_Fold_Enrichment")
+    samples_cols <- 2:ncol(tmp)
     tmp[,samples_cols] <- t(scale(t(tmp[,samples_cols])))
-    tmp <- reshape2::melt(tmp, id.vars=c('ID','name'), value.name='Zscore_Binom_Fold_Enrichment', variable.name='Sample')
+    tmp <- reshape2::melt(tmp, id.vars='uniqueId', value.name='Zscore_Binom_Fold_Enrichment', variable.name='Sample')
     tmp$'Zscore_Binom_Fold_Enrichment'[is.nan(tmp$'Zscore_Binom_Fold_Enrichment')] <- 0
     d <- merge(d,tmp)
 
-    d$uniqueId <- paste(d$Ontology, d$ID, d$name, sep='_')
 
     if (goLabels == 'ID-name'){
         d$label <- paste(d$ID, d$name)
@@ -49,9 +49,9 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
     # Maybe try fastcluster here because hclust find the data too big.
     # Also clusters ontologies separately first to reduce memory footprint.
     if(!is.null(clusterTermsBy)){
-        tmp <- reshape2::dcast(d, ID + name ~ Sample, value.var = clusterTermsBy)
+        tmp <- reshape2::dcast(d, uniqueId ~ Sample, value.var = clusterTermsBy)
         
-        hclust_GOterms <- hclust(dist(tmp[,3:ncol(tmp)],
+        hclust_GOterms <- hclust(dist(tmp[,2:ncol(tmp)],
                                       method = "euclidean"),
                                  method = "ward.D" )
         d$label <- factor(x=d$uniqueId,

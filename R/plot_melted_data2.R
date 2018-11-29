@@ -7,7 +7,7 @@
 #'
 #' @export
 plot_melted_data2 <- function(melted,
-                             outpath){
+                              outpath){
 
     n_samples <- length(unique(melted$Sample))
     n_go_terms <- length(unique(melted$label))
@@ -20,7 +20,8 @@ plot_melted_data2 <- function(melted,
     n_char_go_terms <- max(nchar(as.character(melted$label)))
     n_rows_metrics <- 2 # I may improve this looking at how much '\n' I have in 'metric' and multiply this number by 0.2 + 0.1 for spacing.
 
-    width <- 0.25 * n_samples * n_metrics + 0.15 * n_char_go_terms
+    #width <- 0.25 * n_samples * n_metrics + 0.15 * n_char_go_terms
+    width <- 0.2 * n_samples * n_metrics + 0.1 * n_char_go_terms
     height_top <- 0.2 * n_rows_metrics + 0.1
     height_heatmap <- 0.2 * n_go_terms
     height_bottom <- 0.2 + 0.15 * n_char_samples
@@ -44,10 +45,13 @@ plot_melted_data2 <- function(melted,
         p <- p + ggplot2::facet_grid(. ~ metric) #cols = ggplot2::vars(metric))
     }
     if ('Ontology' %in% colnames(melted) & ! 'metric' %in% colnames(melted)){
-        p <- p + ggplot2::facet_grid(Ontology ~ ., scales="free_y")
+        p <- p + ggplot2::facet_grid(Ontology ~ ., scales="free_y", space="free_y")
     }
     if ('Ontology' %in% colnames(melted) & 'metric' %in% colnames(melted)){
-        p <- p + ggplot2::facet_grid(Ontology ~ metric, scales="free_y")
+        p <- p + ggplot2::facet_grid(Ontology ~ metric, 
+                                     scales="free_y", 
+                                     space="free_y",
+                                     labeller = label_wrap_gen(16))
     }
     #p <- p + scale_fill_gradient(low = "white", high = "darkblue", guide=FALSE)
     #p <- p + scale_color_gradient2(low = "black", mid="yellow", high = "white", midpoint=0.5, guide=FALSE)
@@ -70,7 +74,6 @@ plot_melted_data2 <- function(melted,
     p <- p + ggplot2::ylab('Gene Ontology Terms')
     #p <- p + labs(fill = fillLabel)
 
-    #browser()
     ggplot2::ggsave(filename=outpath,
            plot=p, 
            width=width,

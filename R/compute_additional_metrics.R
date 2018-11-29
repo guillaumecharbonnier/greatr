@@ -33,8 +33,6 @@ compute_additional_metrics <- function(enrichment_table,
                                                 filterThresholds='0.05',
                                                 filterGreaterLowerThans='lower')
 
-    print(paste("debug enrichment_table$signif_binom", str(enrichment_table$signif_binom)))
-
     enrichment_table$pass_signif_tests <- pass_tests(enrichmentTable=enrichment_table,
                                                             filterMetrics=filterPreFilterMetrics,
                                                             filterThresholds=filterPreFilterThresholds,

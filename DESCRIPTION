@@ -22,8 +22,9 @@ Imports:
 	scales
 Description: greatr is a command-line tool allowing to automate multiple samples queries to GREAT using the rGREAT API to produce useful and nice-looking summary plots.
 License: MIT
-URL: https://www.r-project.org, http://www.another.url
-BugReports: https://pkgname.bugtracker.url
+URL: https://github.com/guillaumecharbonnier/greatr
+BugReports: https://github.com/guillaumecharbonnier/greatr/issues
 RoxygenNote: 6.0.1
 NeedsCompilation: no
+Encoding: UTF-8
 Packaged: 2018-11-08 01:15:27 UTC; Charbonnier
