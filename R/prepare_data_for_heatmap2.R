@@ -10,6 +10,12 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
     colnames(splitted_rownames) <- c('Ontology', 'Sample','Index')
     d <- cbind(splitted_rownames, d)
     rownames(d) <- NULL
+    d$Sample <- as.character(d$Sample)
+
+    # Add n_query_size to sample name
+    for (sample in unique(d$Sample)){
+        d$Sample[d$Sample == sample] <- paste0(sample, ' (', attributes(enrichmentTables[[sample]])$n_queried_regions,')')
+    }
     
     d$uniqueId <- paste(d$Ontology, d$ID, d$name, sep='_')
     
@@ -61,7 +67,37 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
 
     id_vars <- c("Sample","ID","name","Ontology","Index","signif_binom","signif_hyper","pass_signif_tests", "pass_post_filter_tests","pass_tests","uniqueId","label")
     
-    measure_vars <- c("Zscore_Binom_Fold_Enrichment", "Binom_Fold_Enrichment")
+    measure_vars <- c("Zscore_Binom_Fold_Enrichment",
+                      #"Binom_Genome_Fraction",
+                      #"Binom_Expected",
+                      "Binom_Observed_Region_Hits",
+                      "Binom_Fold_Enrichment",
+                      #"Binom_Region_Set_Coverage",
+                      #"Binom_Raw_PValue",
+                      #"Binom_Adjp_BH",
+                      #"Hyper_Total_Genes",
+                      #"Hyper_Expected",
+                      "Hyper_Observed_Gene_Hits",
+                      "Hyper_Fold_Enrichment",
+                      #"Hyper_Gene_Set_Coverage",
+                      #"Hyper_Term_Gene_Coverage",
+                      #"Hyper_Raw_PValue",
+                      #"Hyper_Adjp_BH",
+                      #"Binom_Rank",
+                      #"Hyper_Rank",
+                      #"Binom_Bonf_PValue",
+                      #"Hyper_Bonf_PValue",
+                      "mlog10_Binom_Bonf_PValue",
+                      "mlog10_Hyper_Bonf_PValue",
+                      #"Post_Filter_Binom_Rank",
+                      #"Post_Filter_Hyper_Rank",
+                      "sum_Norm_mlog10_Binom_Bonf_PValue",
+                      "sum_Norm_mlog10_Hyper_Bonf_PValue",
+                      "sum_Signif_Norm_mlog10_Binom_Bonf_PValue",
+                      "sum_Signif_Norm_mlog10_Hyper_Bonf_PValue",
+                      "sum_Displayed_Norm_mlog10_Binom_Bonf_PValue",
+                      "sum_Displayed_Norm_mlog10_Hyper_Bonf_PValue")
+
 
     scaled <- apply(X=d[,measure_vars],
                  MARGIN=2,
@@ -81,7 +117,12 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
                              variable.name='metric')
     #melted$uniqueIdMetric <- paste0(melted$uniqueId, melted$metric)
     melted <- merge(values, scaled)
-   
+
+    # Replacing underscore for better-looking labels in heatmap
+    melted$metric <- gsub(pattern='_',
+                          replacement=' ',
+                          x=melted$metric)
+
     #tmp <- merge(melted, scaled, by='uniqueIdMetric')
     #dim(tmp)
 

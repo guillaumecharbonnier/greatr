@@ -7,7 +7,7 @@ Authors@R: c(person("Guillaume", "Charbonnier", role = c("aut", "cre"),
 Author: Guillaume Charbonnier [aut, cre],
   Pat Developer [aut],
   A. User [ctb]
-Maintainer: Guillaume Charbonnier <guillaume.charbonnier@some.domain.net>
+Maintainer: Guillaume Charbonnier <guillaume.charbonnier@outlook.com>
 Depends: R (>= 3.1.0)
 Suggests:
     testthat
@@ -16,6 +16,8 @@ Imports:
 	rtracklayer,
 	GenomicRanges,
 	rGREAT,
+	AnnotationDbi,
+	GO.db,
 	ggplot2,
 	ggpubr,
 	reshape,

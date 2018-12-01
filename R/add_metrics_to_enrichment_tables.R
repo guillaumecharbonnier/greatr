@@ -10,6 +10,11 @@ add_metrics_to_enrichment_tables <- function(enrichment_tables,
                                                                                         filterThresholds=filterThresholds)
         }
     }
+
+    attr(enrichment_tables,'filterMetrics') <- filterMetrics
+    attr(enrichment_tables,'filterGreaterLowerThans') <- filterGreaterLowerThans
+    attr(enrichment_tables,'filterThresholds') <- filterThresholds
+
     return(enrichment_tables)
 }
 

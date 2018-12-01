@@ -24,7 +24,19 @@ context('Test queries to GREAT')
 #          save(enrichment_tables, file='enrichment_tables.Rdata')
 #})
 #
+
 context("Modifications on enrichment_tables")
+## Deprecated: add_similarity_filtered_ontologies should work better for this aim.
+#test_that("best_in_group go ontologies can be added to enrichment_tables", {
+#          load('enrichment_tables.Rdata')
+#          enrichment_tables_with_best_in_go_group <- add_best_in_go_group_ontologies(enrichment_tables)
+#          expect_equal(1,1)
+#          #expect_equal(length(enrichment_tables$LT) + 3, 
+#          #             length(enrichment_tables_with_slim$LT))
+#          save(enrichment_tables_with_best_in_go_group, file='enrichment_tables_with_best_in_go_group.Rdata')
+#})
+
+context("Slim ontologies can be added to enrichment_tables")
 
 test_that("slim ontologies can be added to enrichment_tables", {
           load('enrichment_tables.Rdata')
@@ -35,7 +47,6 @@ test_that("slim ontologies can be added to enrichment_tables", {
           save(enrichment_tables_with_slim, file='enrichment_tables_with_slim.Rdata')
 })
 
-
 test_that("additional metrics can be added to enrichment_tables", {
           load('enrichment_tables_with_slim.Rdata')
           enrichment_tables_with_additional_metrics <- add_metrics_to_enrichment_tables(enrichment_tables_with_slim,
@@ -45,6 +56,13 @@ test_that("additional metrics can be added to enrichment_tables", {
           expect_equal(length(enrichment_tables_with_slim$LT$'GO Cellular Component') + 19, 
                        length(enrichment_tables_with_additional_metrics$LT$'GO Cellular Component'))
           save(enrichment_tables_with_additional_metrics, file='enrichment_tables_with_additional_metrics.Rdata')
+})
+
+test_that("similarity-filtered go ontologies can be added to enrichment_tables", {
+           load('enrichment_tables_with_additional_metrics.Rdata')
+           enrichment_tables_with_similarity_filtered_ontologies <- add_similarity_filtered_ontologies(enrichment_tables_with_additional_metrics)
+           save(enrichment_tables_with_similarity_filtered_ontologies, file='enrichment_tables_with_similarity_filtered_ontologies.Rdata')
+           expect_equal(1,1)
 })
 
 #test_that("enrichment_table can be converted to ggplot2 format", {
@@ -64,22 +82,11 @@ test_that("additional metrics can be added to enrichment_tables", {
 #
 
 test_that("enrichment_table can be converted to ggplot2 format", {
-          load('enrichment_tables_with_additional_metrics.Rdata')
-          data_for_heatmap2 <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_additional_metrics,
+          load('enrichment_tables_with_similarity_filtered_ontologies.Rdata')
+          data_for_heatmap2 <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_similarity_filtered_ontologies,
                                                          clusterTermsBy=NULL,
                                                          goLabels='name')
           save(data_for_heatmap2, file='data_for_heatmap2.Rdata')
-          expect_equal(1, 1)
-})
-
-test_that("melted data can be subsetted", {
-          load('data_for_heatmap2.Rdata')
-          subset_data_for_heatmap <- subset_data_for_heatmap(d = data_for_heatmap2,
-                                                             metrics = 'Binom_Fold_Enrichment',
-                                                             ontologies = 'MSigDB Pathway')
-          plot_melted_data2(melted = subset_data_for_heatmap,
-                            outpath = 'heatmap__Binom_Fold_Enrichment__MSigDB_Pathway.pdf')
-
           expect_equal(1, 1)
 })
 
@@ -91,6 +98,14 @@ test_that("melted data can be plotted", {
           expect_equal(1, 1)
 
 })
+
+test_that("all heatmaps can be produced in one call", {
+          load('data_for_heatmap2.Rdata')
+          plot_all_heatmaps(d = data_for_heatmap2,
+                            device = 'pdf')
+          expect_equal(1, 1)
+})
+
 
 
 
