@@ -50,10 +50,13 @@ test_that("slim ontologies can be added to enrichment_tables", {
 test_that("additional metrics can be added to enrichment_tables", {
           load('enrichment_tables_with_slim.Rdata')
           enrichment_tables_with_additional_metrics <- add_metrics_to_enrichment_tables(enrichment_tables_with_slim,
-                                                                                        filterMetrics=c('Binom_Fold_Enrichment','Binom_Bonf_PValue','Hyper_Bonf_PValue','Post_Filter_Binom_Rank'),
-                                                                                        filterGreaterLowerThans=c('greater','lower','lower','lower'),
-                                                                                        filterThresholds=c('1.5','0.05','0.05','5'))
-          expect_equal(length(enrichment_tables_with_slim$LT$'GO Cellular Component') + 19, 
+                                                                                        filterMetrics=c('Binom_Fold_Enrichment','Binom_Adjp_BH','Hyper_Adjp_BH'),
+                                                                                        filterGreaterLowerThans=c('greater','lower','lower'),
+                                                                                        filterThresholds=c(2,0.05,0.05))
+                                                                                        #filterMetrics=c('Binom_Fold_Enrichment','Binom_Bonf_PValue','Hyper_Bonf_PValue','Post_Filter_Binom_Rank'),
+                                                                                        #filterGreaterLowerThans=c('greater','lower','lower','lower'),
+                                                                                        #filterThresholds=c(1.5,0.05,0.05,30))
+          expect_equal(length(enrichment_tables_with_slim$LT$'GO Cellular Component') + 21, 
                        length(enrichment_tables_with_additional_metrics$LT$'GO Cellular Component'))
           save(enrichment_tables_with_additional_metrics, file='enrichment_tables_with_additional_metrics.Rdata')
 })

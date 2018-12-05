@@ -35,13 +35,13 @@ plot_all_heatmaps <- function(d,
     ontologies_groups <- list(all = ontologies,
                               various_go_bp = c('GO Biological Process',
                                                 'Slim GO Biological Process',
-                                                'Similarity filtered GO Biological Process'),
+                                                'Similarity filtered (Wang 0.5) GO Biological Process'),
                               various_go_cc = c('GO Cellular Component',
                                                 'Slim GO Cellular Component',
-                                                'Similarity filtered GO Cellular Component'),
+                                                'Similarity filtered (Wang 0.5) GO Cellular Component'),
                               various_go_mf = c('GO Molecular Function',
                                                 'Slim GO Molecular Function',
-                                                'Similarity filtered GO Molecular Function'))
+                                                'Similarity filtered (Wang 0.5) GO Molecular Function'))
 
     ontologies <- c(ontologies_unique,ontologies_groups)
 
@@ -51,8 +51,8 @@ plot_all_heatmaps <- function(d,
 
     metrics_groups <- list(all = metrics,
                            filters = c('Binom Fold Enrichment',
-                                       'mlog10 Binom Bonf PValue',
-                                       'mlog10 Hyper Bonf PValue'))
+                                       'mlog10 Binom BH PValue',
+                                       'mlog10 Hyper BH PValue'))
     metrics <- c(metrics_unique, metrics_groups)
     for (metrics_category in names(metrics)){
         for (ontologies_category in names(ontologies)){
