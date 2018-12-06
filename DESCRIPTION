@@ -21,7 +21,8 @@ Imports:
 	ggplot2,
 	ggpubr,
 	reshape,
-	scales
+	scales,
+	yaml
 Description: greatr is a command-line tool allowing to automate multiple samples queries to GREAT using the rGREAT API to produce useful and nice-looking summary plots.
 License: MIT
 URL: https://github.com/guillaumecharbonnier/greatr

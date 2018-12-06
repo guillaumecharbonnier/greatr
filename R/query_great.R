@@ -32,7 +32,7 @@ query_great <- function(beds,
                 ontologies <- availableOntologies(job)
             }
             enrichment_tables[[sample]] = rGREAT::getEnrichmentTables(job, ontology = ontologies)
-            attr(enrichment_tables_with_additional_metrics[[sample]],'n_queried_regions') <-  length(beds[[sample]])
+            attr(enrichment_tables[[sample]],'n_queried_regions') <-  length(beds[[sample]])
         }
     }
     ## TODO: Check that adding this attr here does not mess downstream analysis.

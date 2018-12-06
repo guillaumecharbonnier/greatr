@@ -1,17 +1,34 @@
 #' Prepare data from all enrichment_tables and apply filters relying on the evaluation of all samples.
 #'
-#' @param  clusterTermsBy string indicating a metric to use to cluster GO terms.
+#' @param enrichmentTables list of rGREAT outputs modified by add_additional_metrics function.
+#' @param outdir path for the tabulatated file containing result for all samples.
+#' @param clusterTermsBy string indicating a metric to use to cluster GO terms.
+#' @param goLabels Specify if name (ex: immune response), ID (ex: GO:0006955) or both together are used for labels in heatmaps.
 prepare_data_for_heatmap2 <- function(enrichmentTables,
+                                      outdir='.',
                                       clusterTermsBy=NULL,
                                       goLabels=c('name','ID','ID-name')){
+    # Here I should add Sample and Ontology as columns of each table
+    for (sample in names(enrichmentTables)){
+        for (ontology in names(enrichmentTables[[sample]])){
+            enrichmentTables[[sample]][[ontology]]$Sample <- sample
+            enrichmentTables[[sample]][[ontology]]$Ontology <- ontology
+        }
+    }
+
     d <- do.call(Map, c(f=rbind, enrichmentTables))
     d <- do.call(rbind, d)
-    splitted_rownames <- matrix(unlist(strsplit(x=rownames(d), split='.', fixed=TRUE)), ncol=3, byrow=TRUE)
-    colnames(splitted_rownames) <- c('Ontology', 'Sample','Index')
-    d <- cbind(splitted_rownames, d)
-    rownames(d) <- NULL
-    d$Sample <- as.character(d$Sample)
+    #browser()
 
+    # Command below will fail if '.' is containained in ontology name (which is the case for similarity-filtered ones).
+    # That
+    #splitted_rownames <- matrix(unlist(strsplit(x=rownames(d), split='.', fixed=TRUE)), ncol=3, byrow=TRUE)
+
+    #colnames(splitted_rownames) <- c('Ontology', 'Sample','Index')
+    #d <- cbind(splitted_rownames, d)
+    rownames(d) <- NULL
+    #d$Sample <- as.character(d$Sample)
+    
     # Add n_query_size to sample name
     for (sample in unique(d$Sample)){
         d$Sample[d$Sample == sample] <- paste0(sample, ' (', attributes(enrichmentTables[[sample]])$n_queried_regions,')')
@@ -45,6 +62,7 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
     tmp$'Zscore_Binom_Fold_Enrichment'[is.nan(tmp$'Zscore_Binom_Fold_Enrichment')] <- 0
     d <- merge(d,tmp)
 
+    write.table(x=d, file=file.path(outdir,'table_all.tsv'), sep='\t', row.names=FALSE)
 
     if (goLabels == 'ID-name'){
         d$label <- paste(d$ID, d$name)
@@ -65,7 +83,9 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
                           labels=d$label)
     }
 
-    id_vars <- c("Sample","ID","name","Ontology","Index","signif_binom","signif_hyper","pass_signif_tests", "pass_post_filter_tests","pass_tests","uniqueId","label")
+    id_vars <- c("Sample","ID","name","Ontology",
+                 #"Index",
+                 "signif_binom","signif_hyper","pass_signif_tests", "pass_post_filter_tests","pass_tests","uniqueId","label")
     
     measure_vars <- c("Zscore_Binom_Fold_Enrichment",
                       #"Binom_Genome_Fraction",
@@ -99,7 +119,6 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
                       "sum_Signif_Norm_mlog10_Hyper_Bonf_PValue",
                       "sum_Displayed_Norm_mlog10_Binom_Bonf_PValue",
                       "sum_Displayed_Norm_mlog10_Hyper_Bonf_PValue")
-
 
     scaled <- apply(X=d[,measure_vars],
                  MARGIN=2,

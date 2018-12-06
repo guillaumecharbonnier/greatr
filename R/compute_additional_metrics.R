@@ -1,8 +1,8 @@
 #' Add various additional metrics to the provided enrichment table.
 compute_additional_metrics <- function(enrichment_table,
-                                       filterMetrics=c('Binom_Fold_Enrichment','Binom_Bonf_PValue','Hyper_Bonf_PValue','Post_Filter_Binom_Rank'),
+                                       filterMetrics=c('Binom_Fold_Enrichment','Binom_Adjp_BH','Hyper_Adjp_BH','Post_Filter_Binom_Fold_Enrichment_Rank'),
                                        filterGreaterLowerThans=c('greater','lower','lower','lower'),
-                                       filterThresholds=c('1.5','0.05','0.05','5')){
+                                       filterThresholds=c('2','0.05','0.05','10')){
     enrichment_table$Binom_Rank <- rank(enrichment_table$Binom_Raw_PValue)
     enrichment_table$Hyper_Rank <- rank(enrichment_table$Hyper_Raw_PValue)
     enrichment_table$Binom_Bonf_PValue <- p.adjust(enrichment_table$Binom_Raw_PValue, method='bonferroni')
@@ -46,8 +46,11 @@ compute_additional_metrics <- function(enrichment_table,
 
     #enrichment_table$pass_similarity_test <- pass_similarity_test(enrichment_table, ...)
 
-    enrichment_table[enrichment_table$pass_signif_tests, 'Post_Filter_Binom_Rank'] <- rank(enrichment_table[enrichment_table$pass_signif_tests,'Binom_Raw_PValue'])
-    enrichment_table[enrichment_table$pass_signif_tests, 'Post_Filter_Hyper_Rank'] <- rank(enrichment_table[enrichment_table$pass_signif_tests,'Hyper_Raw_PValue'])
+    enrichment_table[enrichment_table$pass_signif_tests, 'Post_Filter_Binom_PValue_Rank'] <- rank(enrichment_table[enrichment_table$pass_signif_tests,'Binom_Raw_PValue'])
+    enrichment_table[enrichment_table$pass_signif_tests, 'Post_Filter_Hyper_PValue_Rank'] <- rank(enrichment_table[enrichment_table$pass_signif_tests,'Hyper_Raw_PValue'])
+    enrichment_table[enrichment_table$pass_signif_tests, 'Post_Filter_Binom_Fold_Enrichment_Rank'] <- rank( - enrichment_table[enrichment_table$pass_signif_tests,'Binom_Fold_Enrichment'])
+    enrichment_table[enrichment_table$pass_signif_tests, 'Post_Filter_Hyper_Fold_Enrichment_Rank'] <- rank( - enrichment_table[enrichment_table$pass_signif_tests,'Hyper_Fold_Enrichment'])
+
 #    enrichment_table$Post_Filter_Binom_Rank <- ifelse(enrichment_table$pass_signif_tests,
 #                                                      rank(enrichment_table[enrichment_table$pass_signif_tests,'Binom_Raw_PValue']),
 #                                                      NA)

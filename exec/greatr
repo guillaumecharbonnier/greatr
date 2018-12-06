@@ -6,51 +6,58 @@
 
 "A tool to produce genomic region-based enrichment analysis for multiple samples relying on automated queries to GREAT. 
 
-Usage: 
-    greatr [-i <indir>] [-f <files>] [-b background] [-o <outdir>] [-a <assembly>] [-l <slimList] [-r <subsampleReplicates>] [-c collapseSamples] [-m <filterMetrics>] [-s <filterGreaterLowerThans>] [-t <filterThresholds>] [-s semCutoff] [-l <slimList] [-y <yaml>]
+usage: greatr [-y <yaml> -i <indir> -f <files> -b background -o <outdir> -a <assembly> -l <slimList -r <subsampleReplicates> -c collapseSamples -m <filterMetrics> -s <filterGreaterLowerThans> -t <filterThresholds> -l <slimList] 
 
 Options:
     -i <indir>                    Input directory. [default: .]
     -f <files>                    Input sample bed files as comma-separated list. Combined with <indir>. If not provided, all bed files inside <indir> will be taken.
-    -b <background>               An optional additional bed file containing regions not found in input samples to add to the background model containing all regions from <files>.
-    -o <outdir>                   Output directory. If enrichment_tables.Rdata is present from a previous or interrupted run, new input files will be appended and the processessing of existing ones will be skipped. All plots will be redrawn. [default: .]
+    -b <background>               An optional additional bed file containing regions not found in <files> to add to the background model.
+    -o <outdir>                   Output directory. If enrichment_tables.Rdata is present from a previous or interrupted run, new input files will be appended and the processing of existing ones will be skipped. All plots will be redrawn. [default: .]
     -a <assembly>                 Assembly (hg19,mm9,mm10, danRer7) [default: hg19]
     -c <collapseSamples>          An optional commma-separated list of group of samples to merge for additional analysis. Samples from the same group should be semicolon-separeted, e.g. Group1Sample1;Group1Sample2,Group2Sample1.
     -r <subsampleReplicates>      Number of replicates for subsampling, no subsampling if unspecified.
-    -m <filterMetrics>            Comma separated list of metrics to use for filtering. Defaults try to match GREAT default settings. See together <filterGreaterLowerThans> and <filterThresholds>. [default: Binom_Fold_Enrichment,Binom_Adjp_BH,Hyper_Adjp_BH]
+    -m <filterMetrics>            Comma-separated list of metrics to use for filtering. Defaults try to match GREAT default settings. See together <filterGreaterLowerThans> and <filterThresholds>. [default: Binom_Fold_Enrichment,Binom_Adjp_BH,Hyper_Adjp_BH]
     -s <filterGreaterLowerThans>  Vector of 'lower' or 'greater' to apply fiterThresholds values to filterMetrics. [default: greater,lower,lower]
-    -t <filterThresholds>         Vector of thresholds to apply to filterMetrics. Values matching treshold are kept, i.e. '<=' and '>=' are used for comparison. [default: 2,0.05,0.05]
-    -s <semCutoff>                Semantic cutoff value. Sould be an integer between 1 and 9. 9 will only remove the extremely redundant terms. 1 will remove nearly all terms. Using a cutoff below 5 will remove somwhat non-redundant terms. [default: 5]
-    -l <slimList>                 A one-column file containing IDs to reduce analysis to in order to keep output readable and non-redundant.
-    -y <yaml>                     An optional yaml file that could store all settings above.
-    " -> doc
+    -t <filterThresholds>         Vector of thresholds to apply to filterMetrics. Values matching threshold are kept, i.e. '<=' and '>=' are used for comparison. [default: 2,0.05,0.05]
+    -l <slimList>                 An optional one-column txt file or yaml file containing IDs to limit analysis for each ontology in order to keep output readable and non-redundant. Defaults use GO Slim Generic (http://www.geneontology.org). See slimList.yaml in <outdir> after each greatr run for template.
+    -y <yaml>                     An optional yaml file that could store all settings above. See conf.yaml produced in outdir after each greatr run.
+" -> doc
 
 # -----------------------------------------------------------------------------
 # Arg parsing
 # -----------------------------------------------------------------------------
 library(docopt)
 opts <- docopt(doc)
-
-opts$m <- unlist(strsplit(x=opts$m, split=','))
-opts$s <- unlist(strsplit(x=opts$s, split=','))
-opts$t <- as.numeric(unlist(strsplit(x=opts$t, split=',')))
+library(yaml)
+if (!is.null(opts$y)){
+    print('Using yaml for conf')
+    tmp_yaml <- opts$y
+    opts <- read_yaml(file=opts$y)
+    opts$y <- tmp_yaml
+} else {
+    print('Using args for conf')
+    # Currently not sure if these conversions should also be done when yaml is read as conf.
+    opts$m <- unlist(strsplit(x=opts$m, split=','))
+    opts$s <- unlist(strsplit(x=opts$s, split=','))
+    opts$t <- as.numeric(unlist(strsplit(x=opts$t, split=',')))
+}
 print(opts)
 
 ## -----------------------------------------------------------------------------
 ## Function calling
 ## -----------------------------------------------------------------------------
 
+yaml::write_yaml(opts, file=file.path(opts$o, 'conf.yaml'))
 library(greatr)
-plot_facet_heatmaps(indir=opts$i,
-#make_preset_heatmaps(indir=opts$i,
+greatr::run_pipeline(indir=opts$i,
                      files=opts$f,
+                     background=opts$b,
                      outdir=opts$o,
                      assembly=opts$a,
+                     collapseSamples=opts$c,
+                     subsampleReplicates=opts$r,
                      filterMetrics=opts$m,
                      filterGreaterLowerThans=opts$s,
                      filterThresholds=opts$t,
-                     subsampleReplicates=opts$r,
-                     ontology=opts$g,
                      slimList=opts$l)
-
 

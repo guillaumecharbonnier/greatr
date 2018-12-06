@@ -1,6 +1,6 @@
 #' Note: Post filter binom rank is somewhat deprecated as a filtering option as adjusting semantic distance should be better in any cases.
 add_metrics_to_enrichment_tables <- function(enrichment_tables,
-                                             filterMetrics=c('Binom_Fold_Enrichment','Binom_Bonf_PValue','Hyper_Bonf_PValue','Post_Filter_Binom_Rank'),
+                                             filterMetrics=c('Binom_Fold_Enrichment','Binom_Adjp_BH','Hyper_Adjp_BH','Post_Filter_Binom_Fold_Enrichment_Rank'),
                                              filterGreaterLowerThans=c('greater','lower','lower','lower'),
                                              filterThresholds=c('2','0.05','0.05','30')){
     for (sample_label in names(enrichment_tables)){
