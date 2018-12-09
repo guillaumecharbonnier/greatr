@@ -52,7 +52,7 @@ plot_melted_data2 <- function(melted,
         p <- p + ggplot2::facet_grid(Ontology ~ metric, 
                                      scales="free_y", 
                                      space="free_y",
-                                     labeller = label_wrap_gen(12)) #With 16, Panther PATHWAY stay on 1 line
+                                     labeller = ggplot2::label_wrap_gen(12)) #With 16, Panther PATHWAY stay on 1 line
     }
     #p <- p + scale_fill_gradient(low = "white", high = "darkblue", guide=FALSE)
     #p <- p + scale_color_gradient2(low = "black", mid="yellow", high = "white", midpoint=0.5, guide=FALSE)

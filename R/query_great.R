@@ -35,7 +35,6 @@ query_great <- function(beds,
             attr(enrichment_tables[[sample]],'n_queried_regions') <-  length(beds[[sample]])
         }
     }
-    ## TODO: Check that adding this attr here does not mess downstream analysis.
     attr(enrichment_tables,'assembly') <- assembly
 
     if (saveTables){
