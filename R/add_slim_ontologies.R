@@ -1,6 +1,7 @@
 #' Look for all ID in enrichment_tables and create a "slim" version of an ontology which have at least one ID matching from "slimList")
 #' slimList <- 'out/sed/extract_go_id_from_obo/wget/http/www.geneontology.org/ontology/subsets/goslim_generic.txt'
 #' enrichment_tables: 
+#' @export
 add_slim_ontologies <- function(enrichment_tables,
                                 slimList=NULL){
     if (is.null(slimList)){
@@ -29,8 +30,8 @@ add_slim_ontologies <- function(enrichment_tables,
 
 #' enrichment_tables should already contains 'pass_signif_tests' column to greatly reduce computational cost of this step as similiarity distance will only be computed on significant terms.
 #' Then metrics have to be computed again so postfilter doesnot ruin similarity selection.
+#' @export
 add_similarity_filtered_ontologies <- function(enrichment_tables){
-
     for (ontology in c('GO Cellular Component', 'GO Biological Process', 'GO Molecular Function')){
         if (ontology == 'GO Cellular Component'){
             ont <- 'CC'

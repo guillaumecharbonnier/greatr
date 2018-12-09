@@ -4,6 +4,8 @@
 #' @param outdir path for the tabulatated file containing result for all samples.
 #' @param clusterTermsBy string indicating a metric to use to cluster GO terms.
 #' @param goLabels Specify if name (ex: immune response), ID (ex: GO:0006955) or both together are used for labels in heatmaps.
+#' @return melted dataframe to use with ggplot2
+#' @export
 prepare_data_for_heatmap2 <- function(enrichmentTables,
                                       outdir='.',
                                       clusterTermsBy=NULL,

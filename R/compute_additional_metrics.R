@@ -13,12 +13,12 @@ compute_additional_metrics <- function(enrichment_table,
     enrichment_table$Hyper_Adjp_BH <- p.adjust(enrichment_table$Hyper_Raw_PValue, method='BH')
     enrichment_table$mlog10_Binom_Bonf_PValue <- -log10(enrichment_table$Binom_Bonf_PValue)
     enrichment_table$mlog10_Hyper_Bonf_PValue <- -log10(enrichment_table$Hyper_Bonf_PValue)
-    enrichment_table$mlog10_Binom_Bonf_PValue[enrichment_table$mlog10_Binom_Bonf_PValue == Inf] <- 333 
-    enrichment_table$mlog10_Hyper_Bonf_PValue[enrichment_table$mlog10_Hyper_Bonf_PValue == Inf] <- 333 
+    enrichment_table$mlog10_Binom_Bonf_PValue[enrichment_table$mlog10_Binom_Bonf_PValue == Inf] <- 325 
+    enrichment_table$mlog10_Hyper_Bonf_PValue[enrichment_table$mlog10_Hyper_Bonf_PValue == Inf] <- 325 
     enrichment_table$mlog10_Binom_BH_PValue <- -log10(enrichment_table$Binom_Adjp_BH)
     enrichment_table$mlog10_Hyper_BH_PValue <- -log10(enrichment_table$Hyper_Adjp_BH)
-    enrichment_table$mlog10_Binom_BH_PValue[enrichment_table$mlog10_Binom_BH_PValue == Inf] <- 333 
-    enrichment_table$mlog10_Hyper_BH_PValue[enrichment_table$mlog10_Hyper_BH_PValue == Inf] <- 333 
+    enrichment_table$mlog10_Binom_BH_PValue[enrichment_table$mlog10_Binom_BH_PValue == Inf] <- 325 
+    enrichment_table$mlog10_Hyper_BH_PValue[enrichment_table$mlog10_Hyper_BH_PValue == Inf] <- 325 
 
     filterPostFilter <- grepl(pattern='^Post_Filter', x=filterMetrics)
     filterPreFilter <- !grepl(pattern='^Post_Filter', x=filterMetrics)

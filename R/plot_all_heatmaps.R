@@ -3,6 +3,7 @@
 #' @param d melted data produced by "prepare_data_for_heatmap2"
 #' @param outdir 
 #' @param device set the image format.
+#' @export
 plot_all_heatmaps <- function(d,
                               outdir='.',
                               device=c('pdf','svg','png')){
