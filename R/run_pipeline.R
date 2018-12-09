@@ -39,7 +39,7 @@ run_pipeline <- function(indir='.',
     save(enrichment_tables, file=file.path(outdir,'enrichment_tables.Rdata'))
 
     enrichment_tables_with_slim <- add_slim_ontologies(enrichment_tables,
-                                                       slimList='goslim_generic.txt')
+                                                       slimList=slimList)
 
     enrichment_tables_with_additional_metrics <- add_metrics_to_enrichment_tables(enrichment_tables_with_slim,
                                                                                   filterMetrics=c('Binom_Fold_Enrichment','Binom_Adjp_BH','Hyper_Adjp_BH'),

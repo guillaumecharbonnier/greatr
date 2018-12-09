@@ -6,7 +6,7 @@ add_slim_ontologies <- function(enrichment_tables,
                                 slimList=NULL){
     if (is.null(slimList)){
         print('No slim list provided, using goslim_generic instead')
-        slimList <- goslim_generic
+        slimList <- data(goslim_generic, package='greatr')
     } else  if (tools::file_ext(slimList) == 'txt'){
         slimList <- scan(slimList, character(), quote = "")
     } else if (tools::file_ext(slimList) == 'yaml'){
