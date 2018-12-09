@@ -29,7 +29,7 @@ query_great <- function(beds,
             print(paste0('Running GREAT analysis for ',sample,'.'))
             job = rGREAT::submitGreatJob(beds[[sample]], species = assembly, request_interval=5)
             if (is.null(ontologies)){
-                ontologies <- availableOntologies(job)
+                ontologies <- rGREAT::availableOntologies(job)
             }
             enrichment_tables[[sample]] = rGREAT::getEnrichmentTables(job, ontology = ontologies)
             attr(enrichment_tables[[sample]],'n_queried_regions') <-  length(beds[[sample]])
