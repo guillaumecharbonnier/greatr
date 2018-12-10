@@ -46,7 +46,7 @@ query_great <- function(beds,
                 width=width, 
                 height=height)
             par(mfrow = c(1, 3))
-            res <- plotRegionGeneAssociationGraphs(job)
+            res <- rGREAT::plotRegionGeneAssociationGraphs(job)
             dev.off()
             write.table(data.frame(res), file.path(single_sample_path,'regionGeneAssociation.tsv'), col.names = TRUE, sep = "\t")
             for (ontology in names(enrichment_table)){
@@ -62,7 +62,7 @@ query_great <- function(beds,
                 #        width=width,
                 #        height=height)
                 #    par(mfrow = c(1, 3))
-                #    res <- plotRegionGeneAssociationGraphs(job, ontology=ontology, termID=id)
+                #    res <- rGREAT::plotRegionGeneAssociationGraphs(job, ontology=ontology, termID=id)
                 #    dev.off()
                 #    write.table(data.frame(res), file.path(single_sample_ontology_id_path,'regionGeneAssociation.tsv'), col.names = TRUE, sep = "\t")
                 #}
