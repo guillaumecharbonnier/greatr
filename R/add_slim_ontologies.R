@@ -55,37 +55,39 @@ add_similarity_filtered_ontologies <- function(enrichment_tables){
 
         for (simCutoff in 1:9){
             simCutoff <- simCutoff/10
-            id_best_in_group <- data.frame(ID = enrichment_tables[[1]][[ontology]][,'ID'], best_in_group = NA, stringsAsFactors=FALSE)
 
-            for (sample_label in names(enrichment_tables)){
-                message('for ', sample_label)
-                enrichment_table <- enrichment_tables[[sample_label]][[ontology]]
-                id_pval <- enrichment_table[enrichment_table$pass_signif_tests,c('ID', 'Binom_Raw_PValue','Binom_Fold_Enrichment')]
-                # NOTE: I may also try to ask distance GO1=onlyOneID, GO2=all_id_pval$ID. May be faster, or not.
-                #sim_dist <- GOSemSim::mgoSim(id_pval$ID, id_pval$ID, semData=GO_data, measure="Wang", combine=NULL)
+            for (selVar in c('Binom_Fold_Enrichment', 'Binom_Raw_PValue')){
+                id_best_in_group <- data.frame(ID = enrichment_tables[[1]][[ontology]][,'ID'], best_in_group = NA, stringsAsFactors=FALSE)
+                for (sample_label in names(enrichment_tables)){
+                    message('for ', sample_label)
+                    enrichment_table <- enrichment_tables[[sample_label]][[ontology]]
+                    id_pval <- enrichment_table[enrichment_table$pass_signif_tests,c('ID', 'Binom_Raw_PValue','Binom_Fold_Enrichment')]
+                    # NOTE: I may also try to ask distance GO1=onlyOneID, GO2=all_id_pval$ID. May be faster, or not.
+                    #sim_dist <- GOSemSim::mgoSim(id_pval$ID, id_pval$ID, semData=GO_data, measure="Wang", combine=NULL)
 
-                id_pval$best_in_group <- unlist(lapply(X=id_pval$ID, FUN=check_if_best_in_simgroup, id_pval = id_pval, semData = semData, simCutoff=simCutoff, selVar='Binom_Fold_Enrichment'))
-                #id_pval$best_in_group <- unlist(mclapply(X=id_pval$ID, FUN=check_if_best_in_group, id_pval = id_pval, mc.cores = detectCores(all.tests = FALSE, logical = TRUE)))
-                id_pval[,c('Binom_Raw_PValue','Binom_Fold_Enrichment')] <- NULL
+                    id_pval$best_in_group <- unlist(lapply(X=id_pval$ID, FUN=check_if_best_in_simgroup, id_pval = id_pval, semData = semData, simCutoff=simCutoff, selVar=selVar))
+                    #id_pval$best_in_group <- unlist(mclapply(X=id_pval$ID, FUN=check_if_best_in_group, id_pval = id_pval, mc.cores = detectCores(all.tests = FALSE, logical = TRUE)))
+                    id_pval[,c('Binom_Raw_PValue','Binom_Fold_Enrichment')] <- NULL
 
-                id_best_in_group <- merge(id_best_in_group, id_pval, by='ID', suffixes=c('',sample_label), all=TRUE)
+                    id_best_in_group <- merge(id_best_in_group, id_pval, by='ID', suffixes=c('',sample_label), all=TRUE)
+                }
+                id_best_in_group$best_in_group <- NULL
+                id_best_in_group[is.na(id_best_in_group)] <- FALSE
+                id_best_in_group$best_in_group_in_any_samples <- apply(X=id_best_in_group[,-1], MARGIN=1, FUN=any)
+                ids_to_keep <- id_best_in_group[id_best_in_group$best_in_group_in_any_samples,'ID']
+
+                new_ontology_name <- paste0('Similarity filtered (Best ',selVar, '; Wang ',simCutoff,') ', ontology)
+                for (sample_label in names(enrichment_tables)){
+                    et <-  enrichment_tables[[sample_label]][[ontology]]
+                    enrichment_tables[[sample_label]][[new_ontology_name]] <- et[et$ID %in% ids_to_keep,]
+                }
+
+                # here add compute additionnal metrics again so post-filter is updated with similarity filtering.
+                enrichment_tables[[sample_label]][[new_ontology_name]] <- compute_additional_metrics(enrichment_tables[[sample_label]][[new_ontology_name]],
+                                                                                                     filterMetrics=attributes(enrichment_tables)$filterMetrics,
+                                                                                                     filterGreaterLowerThans=attributes(enrichment_tables)$filterGreaterLowerThans,
+                                                                                                     filterThresholds=attributes(enrichment_tables)$filterThresholds)
             }
-            id_best_in_group$best_in_group <- NULL
-            id_best_in_group[is.na(id_best_in_group)] <- FALSE
-            id_best_in_group$best_in_group_in_any_samples <- apply(X=id_best_in_group[,-1], MARGIN=1, FUN=any)
-            ids_to_keep <- id_best_in_group[id_best_in_group$best_in_group_in_any_samples,'ID']
-
-            new_ontology_name <- paste0('Similarity filtered (Wang ',simCutoff,') ', ontology)
-            for (sample_label in names(enrichment_tables)){
-                et <-  enrichment_tables[[sample_label]][[ontology]]
-                enrichment_tables[[sample_label]][[new_ontology_name]] <- et[et$ID %in% ids_to_keep,]
-            }
-
-            # here add compute additionnal metrics again so post-filter is updated with similarity filtering.
-            enrichment_tables[[sample_label]][[new_ontology_name]] <- compute_additional_metrics(enrichment_tables[[sample_label]][[new_ontology_name]],
-                                                                                                                      filterMetrics=attributes(enrichment_tables)$filterMetrics,
-                                                                                                                      filterGreaterLowerThans=attributes(enrichment_tables)$filterGreaterLowerThans,
-                                                                                                                      filterThresholds=attributes(enrichment_tables)$filterThresholds)
         }
     }
     return(enrichment_tables)
@@ -108,12 +110,13 @@ check_if_best_in_simgroup <- function(id_to_check = 'GO:0044424',
     #print(paste('Looking if ', id_to_check, ' is best in similarity group'))
     sim_dist <- GOSemSim::mgoSim(id_to_check, id_pval$ID, semData=semData, measure=measure, combine=NULL)
     ids_to_check <- colnames(sim_dist)[sim_dist > simCutoff]
-    #if (id_to_check == 'GO:0050852'){browser()}
-
     if (selVar == 'Binom_Fold_Enrichment'){
         checkTRUE <- identical(max(id_pval[id_pval$ID %in% ids_to_check, selVar]),
                                id_pval[id_pval$ID == id_to_check, selVar])
     } else {
+        #print(paste('id_to_check:', id_to_check))
+        #if (id_to_check == 'GO:0042611'){browser()}
+        #print(paste(min(id_pval[id_pval$ID %in% ids_to_check, selVar])))
         checkTRUE <- identical(min(id_pval[id_pval$ID %in% ids_to_check, selVar]),
                                id_pval[id_pval$ID == id_to_check, selVar])
     }

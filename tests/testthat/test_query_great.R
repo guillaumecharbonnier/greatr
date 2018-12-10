@@ -1,6 +1,6 @@
-## file.remove(list.files(pattern='*.(png|pdf)')); build();test()
+## file.remove(list.files(pattern='*.(png|pdf)', recursive=TRUE)); build();test()
 #
-#context('Test queries to GREAT')
+context('Test queries to GREAT')
 ###
 ####test_that("enrichment_tables are produced from queried BED files.", {
 ####          load('beds.Rdata')
@@ -12,23 +12,23 @@
 ####                                           ontologies=NULL)
 ####          expect_equal(1, 1)
 ####})
-###
-###test_that("enrichment_tables can be loaded from saved query.", {
-###          load('beds.Rdata')
-###          enrichment_tables <- query_great(beds,
-###                                           outdir='.',
-###                                           saveTables=FALSE,
-###                                           loadTables=TRUE,
-###                                           assembly='hg19',
-###                                           ontologies=NULL)
-###          expect_equal(length(enrichment_tables$LT$'GO Cellular Component'),
-###                       17)
-###          save(enrichment_tables, file='enrichment_tables.Rdata')
-###})
-###
-##
+
+#test_that("enrichment_tables can be loaded from saved query.", {
+#          load('beds.Rdata')
+#          enrichment_tables <- query_great(beds,
+#                                           outdir='.',
+#                                           saveTables=FALSE,
+#                                           loadTables=TRUE,
+#                                           assembly='hg19',
+#                                           ontologies=NULL)
+#          expect_equal(length(enrichment_tables$LT$'GO Cellular Component'),
+#                       17)
+#          save(enrichment_tables, file='enrichment_tables.Rdata')
+#})
+
+
 #
-#context("Slim ontologies can be added to enrichment_tables")
+context("Slim ontologies can be added to enrichment_tables")
 #
 #test_that("Default slim ontologies can be added to enrichment_tables", {
 #          load('enrichment_tables.Rdata')
@@ -49,7 +49,7 @@
 #
 #
 #
-#context("Additional metrics can be added to enrichment_tables")
+context("Additional metrics can be added to enrichment_tables")
 #
 #test_that("Additional metrics can be added to enrichment_tables with default settings", {
 #          load('enrichment_tables_with_slim.Rdata')
@@ -80,13 +80,15 @@
 #          save(enrichment_tables_with_additional_metrics, file='enrichment_tables_with_additional_metrics.Rdata')
 #})
 #
+#context("Similarity-filtered go ontologies can be added to enrichment tables")
 #test_that("similarity-filtered go ontologies can be added to enrichment_tables", {
 #           load('enrichment_tables_with_additional_metrics.Rdata')
 #           enrichment_tables_with_similarity_filtered_ontologies <- add_similarity_filtered_ontologies(enrichment_tables_with_additional_metrics)
 #           save(enrichment_tables_with_similarity_filtered_ontologies, file='enrichment_tables_with_similarity_filtered_ontologies.Rdata')
 #           expect_equal(1,1)
-#})
 #
+#})
+
 ###test_that("enrichment_table can be converted to ggplot2 format", {
 ###          load('enrichment_tables_with_additional_metrics.Rdata')
 ###          data_for_heatmap <- prepare_data_for_heatmap(enrichmentTables=enrichment_tables_with_additional_metrics,
@@ -121,12 +123,12 @@
 ##
 ##})
 ##
-#test_that("all heatmaps can be produced in one call", {
-#          load('data_for_heatmap2.Rdata')
-#          plot_all_heatmaps(d = data_for_heatmap2,
-#                            device = 'pdf')
-#          expect_equal(1, 1)
-#})
+test_that("all heatmaps can be produced in one call", {
+          load('data_for_heatmap2.Rdata')
+          plot_all_heatmaps(d = data_for_heatmap2,
+                            device = 'pdf')
+          expect_equal(1, 1)
+})
 #
 ## Should solve this issue for big files
 ##cairo error 'invalid value (typically too big) for the size of the input (surface, pattern, etc.)'

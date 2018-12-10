@@ -36,19 +36,22 @@ plot_all_heatmaps <- function(d,
     ontologies_groups <- list(all = ontologies,
                               various_go_bp = c('GO Biological Process',
                                                 'Slim GO Biological Process',
-                                                'Similarity filtered (Wang 0.5) GO Biological Process'),
+                                                'Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.5) GO Biological Process',
+                                                'Similarity filtered (Best Binom_Raw_PValue; Wang 0.5) GO Biological Process'),
                               various_go_cc = c('GO Cellular Component',
                                                 'Slim GO Cellular Component',
-                                                'Similarity filtered (Wang 0.5) GO Cellular Component'),
+                                                'Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.5) GO Cellular Component',
+                                                'Similarity filtered (Best Binom_Raw_PValue; Wang 0.5) GO Cellular Component'),
                               various_go_mf = c('GO Molecular Function',
                                                 'Slim GO Molecular Function',
-                                                'Similarity filtered (Wang 0.5) GO Molecular Function'),
-                              wang1_go = c('Similarity filtered (Wang 0.1) GO Biological Process',
-                                           'Similarity filtered (Wang 0.1) GO Cellular Component',
-                                           'Similarity filtered (Wang 0.1) GO Molecular Function'),
-                              wang2_go = c('Similarity filtered (Wang 0.2) GO Biological Process',
-                                           'Similarity filtered (Wang 0.2) GO Cellular Component',
-                                           'Similarity filtered (Wang 0.2) GO Molecular Function'))
+                                                'Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.5) GO Molecular Function',
+                                                'Similarity filtered (Best Binom_Raw_PValue; Wang 0.5) GO Molecular Function'),
+                              bfe_wang1_go = c('Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.1) GO Biological Process',
+                                           'Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.1) GO Cellular Component',
+                                           'Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.1) GO Molecular Function'),
+                              bfe_wang2_go = c('Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.2) GO Biological Process',
+                                           'Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.2) GO Cellular Component',
+                                           'Similarity filtered (Best Binom_Fold_Enrichment; Wang 0.2) GO Molecular Function'))
 
     ontologies <- c(ontologies_unique,ontologies_groups)
 
@@ -57,9 +60,9 @@ plot_all_heatmaps <- function(d,
     names(metrics_unique) <- metrics
 
     metrics_groups <- list(all = metrics,
-                           filters = c('Binom Fold Enrichment',
-                                       'mlog10 Binom BH PValue',
-                                       'mlog10 Hyper BH PValue'))
+                           filters = c('mlog10 Binom BH PValue',
+                                       'mlog10 Hyper BH PValue',
+                                       'Binom Fold Enrichment'))
     metrics <- c(metrics_unique, metrics_groups)
     for (metrics_category in names(metrics)){
         for (ontologies_category in names(ontologies)){

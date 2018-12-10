@@ -52,7 +52,7 @@ plot_melted_data2 <- function(melted,
         p <- p + ggplot2::facet_grid(Ontology ~ metric, 
                                      scales="free_y", 
                                      space="free_y",
-                                     labeller = ggplot2::label_wrap_gen(12)) #With 16, Panther PATHWAY stay on 1 line
+                                     labeller = ggplot2::label_wrap_gen(22)) #With 16, Panther PATHWAY stay on 1 line. Used to be 12.
     }
     #p <- p + scale_fill_gradient(low = "white", high = "darkblue", guide=FALSE)
     #p <- p + scale_color_gradient2(low = "black", mid="yellow", high = "white", midpoint=0.5, guide=FALSE)
@@ -74,6 +74,9 @@ plot_melted_data2 <- function(melted,
     p <- p + ggplot2::xlab('Samples')
     p <- p + ggplot2::ylab('Gene Ontology Terms')
     #p <- p + labs(fill = fillLabel)
+    print(paste('width height:', width, height))
+    print(unique(melted$Ontology))
+    print(unique(melted$metric))
 
     ggplot2::ggsave(filename=outpath,
            plot=p, 
