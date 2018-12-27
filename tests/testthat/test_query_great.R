@@ -58,6 +58,20 @@ context("Additional metrics can be added to enrichment_tables")
 #          expect_equal(length(enrichment_tables_with_slim$LT$'GO Cellular Component') + 23, 
 #                       length(enrichment_tables_with_additional_metrics$LT$'GO Cellular Component'))
 #})
+
+#test_that("Additional metrics can be added to enrichment_tables with default settings for problematic atac set", {
+#          load('enrichment_tables_atac.Rdata')
+#          enrichment_tables_atac <- enrichment_tables
+#          enrichment_tables_atac_with_additional_metrics <- add_metrics_to_enrichment_tables(enrichment_tables_atac)
+#
+#          expect_equal(length(enrichment_tables_atac[[1]][[1]]) + 25, 
+#                       length(enrichment_tables_atac_with_additional_metrics[[1]][[1]]))
+#          save(enrichment_tables_atac_with_additional_metrics, file='enrichment_tables_atac_with_additional_metrics.Rdata')
+#})
+
+
+
+
 #
 #test_that("Additional metrics can be added to enrichment_tables with default settings", {
 #          load('enrichment_tables_with_slim.Rdata')
@@ -80,7 +94,7 @@ context("Additional metrics can be added to enrichment_tables")
 #          save(enrichment_tables_with_additional_metrics, file='enrichment_tables_with_additional_metrics.Rdata')
 #})
 #
-#context("Similarity-filtered go ontologies can be added to enrichment tables")
+context("Similarity-filtered go ontologies can be added to enrichment tables")
 #test_that("similarity-filtered go ontologies can be added to enrichment_tables", {
 #           load('enrichment_tables_with_additional_metrics.Rdata')
 #           enrichment_tables_with_similarity_filtered_ontologies <- add_similarity_filtered_ontologies(enrichment_tables_with_additional_metrics)
@@ -88,6 +102,16 @@ context("Additional metrics can be added to enrichment_tables")
 #           expect_equal(1,1)
 #
 #})
+#test_that("similarity-filtered go ontologies can be added to enrichment_tables", {
+#           load('enrichment_tables_atac_with_additional_metrics.Rdata')
+#           enrichment_tables_atac_with_similarity_filtered_ontologies <- add_similarity_filtered_ontologies(enrichment_tables_atac_with_additional_metrics)
+#           save(enrichment_tables_atac_with_similarity_filtered_ontologies, file='enrichment_tables_atac_with_similarity_filtered_ontologies.Rdata')
+#           expect_equal(1,1)
+#
+#})
+
+
+
 
 ###test_that("enrichment_table can be converted to ggplot2 format", {
 ###          load('enrichment_tables_with_additional_metrics.Rdata')
@@ -123,12 +147,12 @@ context("Additional metrics can be added to enrichment_tables")
 ##
 ##})
 ##
-test_that("all heatmaps can be produced in one call", {
-          load('data_for_heatmap2.Rdata')
-          plot_all_heatmaps(d = data_for_heatmap2,
-                            device = 'pdf')
-          expect_equal(1, 1)
-})
+#test_that("all heatmaps can be produced in one call", {
+#          load('data_for_heatmap2.Rdata')
+#          plot_all_heatmaps(d = data_for_heatmap2,
+#                            device = 'pdf')
+#          expect_equal(1, 1)
+#})
 #
 ## Should solve this issue for big files
 ##cairo error 'invalid value (typically too big) for the size of the input (surface, pattern, etc.)'

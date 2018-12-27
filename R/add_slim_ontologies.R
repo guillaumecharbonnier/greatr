@@ -53,26 +53,30 @@ add_similarity_filtered_ontologies <- function(enrichment_tables){
 
         message('Adding best-in-similarity-group ontology for ', ontology)
 
-        for (simCutoff in 1:9){
-            simCutoff <- simCutoff/10
-
+        for (simCutoff in 1:9/10){
             for (selVar in c('Binom_Fold_Enrichment', 'Binom_Raw_PValue')){
                 id_best_in_group <- data.frame(ID = enrichment_tables[[1]][[ontology]][,'ID'], best_in_group = NA, stringsAsFactors=FALSE)
                 for (sample_label in names(enrichment_tables)){
                     message('for ', sample_label)
                     enrichment_table <- enrichment_tables[[sample_label]][[ontology]]
                     id_pval <- enrichment_table[enrichment_table$pass_signif_tests,c('ID', 'Binom_Raw_PValue','Binom_Fold_Enrichment')]
-                    # NOTE: I may also try to ask distance GO1=onlyOneID, GO2=all_id_pval$ID. May be faster, or not.
-                    #sim_dist <- GOSemSim::mgoSim(id_pval$ID, id_pval$ID, semData=GO_data, measure="Wang", combine=NULL)
+                    # Considering edge case where there is no significant term in sample:
+                    if (nrow(id_pval) == 0){
+                        id_best_in_group[,sample_label] <- FALSE
+                    } else {
+                        # NOTE: I may also try to ask distance GO1=onlyOneID, GO2=all_id_pval$ID. May be faster, or not.
+                        #sim_dist <- GOSemSim::mgoSim(id_pval$ID, id_pval$ID, semData=GO_data, measure="Wang", combine=NULL)
 
-                    id_pval$best_in_group <- unlist(lapply(X=id_pval$ID, FUN=check_if_best_in_simgroup, id_pval = id_pval, semData = semData, simCutoff=simCutoff, selVar=selVar))
-                    #id_pval$best_in_group <- unlist(mclapply(X=id_pval$ID, FUN=check_if_best_in_group, id_pval = id_pval, mc.cores = detectCores(all.tests = FALSE, logical = TRUE)))
-                    id_pval[,c('Binom_Raw_PValue','Binom_Fold_Enrichment')] <- NULL
+                        id_pval$best_in_group <- unlist(lapply(X=id_pval$ID, FUN=check_if_best_in_simgroup, id_pval = id_pval, semData = semData, simCutoff=simCutoff, selVar=selVar))
+                        #id_pval$best_in_group <- unlist(mclapply(X=id_pval$ID, FUN=check_if_best_in_group, id_pval = id_pval, mc.cores = detectCores(all.tests = FALSE, logical = TRUE)))
+                        id_pval[,c('Binom_Raw_PValue','Binom_Fold_Enrichment')] <- NULL
 
-                    id_best_in_group <- merge(id_best_in_group, id_pval, by='ID', suffixes=c('',sample_label), all=TRUE)
+                        id_best_in_group <- merge(id_best_in_group, id_pval, by='ID', suffixes=c('',sample_label), all=TRUE)
+                    }
                 }
                 id_best_in_group$best_in_group <- NULL
                 id_best_in_group[is.na(id_best_in_group)] <- FALSE
+                #browser()
                 id_best_in_group$best_in_group_in_any_samples <- apply(X=id_best_in_group[,-1], MARGIN=1, FUN=any)
                 ids_to_keep <- id_best_in_group[id_best_in_group$best_in_group_in_any_samples,'ID']
 
