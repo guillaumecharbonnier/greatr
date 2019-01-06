@@ -23,7 +23,8 @@ run_pipeline <- function(indir='.',
                          filterMetrics=c('Binom_Fold_Enrichment','Binom_Adjp_BH','Hyper_Adjp_BH'),
                          filterGreaterLowerThans=c('greater','lower','lower'),
                          filterThresholds=c('2','0.05','0.05'),
-                         slimList=NULL){
+                         slimList=NULL,
+                         yaml='conf.yaml'){
     beds <- load_beds(indir=indir,
                       outdir=outdir,
                       files=files,
@@ -38,24 +39,38 @@ run_pipeline <- function(indir='.',
                                      ontologies=NULL)
     save(enrichment_tables, file=file.path(outdir,'enrichment_tables.Rdata'))
 
-    enrichment_tables_with_slim <- add_slim_ontologies(enrichment_tables,
-                                                       slimList=slimList)
+    ets <- collapse_samples(enrichment_tables,
+                            yaml_path=yaml)
+    # obsolete now with add_custom_ontologies()
+    #enrichment_tables_with_slim <- add_slim_ontologies(enrichment_tables_for_collapsed_samples)
 
-    enrichment_tables_with_additional_metrics <- add_metrics_to_enrichment_tables(enrichment_tables_with_slim,
-                                                                                  filterMetrics=c('Binom_Fold_Enrichment','Binom_Adjp_BH','Hyper_Adjp_BH'),
-                                                                                  filterGreaterLowerThans=c('greater','lower','lower'),
-                                                                                  filterThresholds=c(2,0.05,0.05))
+    #if (!is.null(slimList)){
+    ets <- add_custom_ontologies(ets,
+                                 yaml)
+    #} else {
+    #    print('Write function to add template of yaml file to use here.')
+    #    print('slimList.yaml')
+    #}
+
+    ets <- add_metrics_to_enrichment_tables(ets,
+                                            filterMetrics=c('Binom_Fold_Enrichment','Binom_Adjp_BH','Hyper_Adjp_BH'),
+                                            filterGreaterLowerThans=c('greater','lower','lower'),
+                                            filterThresholds=c(2,0.05,0.05))
     
-    enrichment_tables_with_similarity_filtered_ontologies <- add_similarity_filtered_ontologies(enrichment_tables_with_additional_metrics)
+    ets <- add_similarity_filtered_ontologies(ets)
 
-    data_for_heatmap2 <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_similarity_filtered_ontologies,
-                                                   outdir=outdir,
-                                                   clusterTermsBy=NULL,
-                                                   goLabels='name')
+    for (clusterTermsBy in c('ontology_order', 'Binom_Fold_Enrichment')){
+        outdir_multi <- paste0(outdir, '/clustermTermsBy-',clusterTermsBy)
+        dir.create(outdir_multi, recursive=T, showWarnings=F)
+        data_for_heatmap2 <- prepare_data_for_heatmap2(enrichmentTables = ets,
+                                                       outdir=outdir_multi,
+                                                       clusterTermsBy=clusterTermsBy,
+                                                       goLabels='name')
+        plot_all_heatmaps(d=data_for_heatmap2,
+                          outdir=outdir_multi,
+                          device='pdf')
+    }
 
-    plot_all_heatmaps(d=data_for_heatmap2,
-                      outdir=outdir,
-                      device='pdf')
     # Should solve this issue for big files
     #cairo error 'invalid value (typically too big) for the size of the input (surface, pattern, etc.)'
     #test_query_great.R:114: error: all heatmaps can be produced in one call

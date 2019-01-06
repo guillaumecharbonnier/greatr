@@ -11,7 +11,7 @@ add_slim_ontologies <- function(enrichment_tables,
         slimList <- scan(slimList, character(), quote = "")
     } else if (tools::file_ext(slimList) == 'yaml'){
         print('yaml as slimList is not implemented yet')
-        slimList <- read_yaml(file=slimList)
+        slimList <- yaml::read_yaml(file=slimList)
     }
 
     for (sample_label in names(enrichment_tables)){
@@ -27,6 +27,76 @@ add_slim_ontologies <- function(enrichment_tables,
     }
     return(enrichment_tables)
 }
+
+#' Add custom ontologies provided by a yaml file.
+#' @param yaml path to a yaml containing custom ontologies, or the list of the loaded yaml itself
+add_custom_ontologies <- function(enrichment_tables,
+                                  yaml){
+    if (typeof(yaml) == "character"){
+        custom_ontologies <- yaml::read_yaml(file=yaml)
+    } else if (typeof(yaml) == "list"){
+        custom_ontologies <- yaml
+    }
+
+    if (any(!custom_ontologies$source %in% names(enrichment_tables[[1]]))){
+        error('Specified ontology does not exist in enrichement tables. Check source in yaml')
+    }
+    for (custom_ontology in custom_ontologies$ontologies){
+        print(custom_ontology$name)
+        for (sample_label in names(enrichment_tables)){
+            res <- enrichment_tables[[sample_label]][[1]]
+            res$selId <- NA 
+            res <- res[FALSE,]
+
+            for (ontology in custom_ontology$source){
+                enrichment_table <- enrichment_tables[[sample_label]][[ontology]]
+
+                enrichment_table$selId <- switch(custom_ontology$id_type,
+                                 "ID" = enrichment_table[,"ID"],
+                                 "name" = enrichment_table[,"name"],
+                                 "ID_name" = paste(enrichment_table[,"ID"], 
+                                                   enrichment_table[,"name"], 
+                                                   sep='_'),
+                                 "ontology_ID_name" = paste(ontology,
+                                                            enrichment_table[,"ID"], 
+                                                            enrichment_table[,"name"],
+                                                            sep='_'))
+
+                inCustomList <- enrichment_table$selId %in% custom_ontology$ids
+
+                res <- rbind(res,
+                             enrichment_table[inCustomList,])
+
+            }
+            # Reordering 
+            ordered <- data.frame(selId=custom_ontology$ids)
+            res <- merge(ordered, res, by='selId', sort=FALSE)
+            res$selId <- NULL
+
+            # Probably obsolete because I always order by list order regardless:
+            #if (custom_ontology$order){
+            #    res$order <- # Add here ids as factors using custom_ontology$ids as levels. 
+            #                d$label <- factor(x=d$uniqueId,
+            #                                                            levels=d$uniqueId[hclust_GOterms$order],
+            #                                                                                      labels=d$label)
+            #}
+            if (is.null(custom_ontology$recompute_adjusted_pval)){
+                custom_ontology$recompute_adjusted_pval <- FALSE
+            }
+            if (custom_ontology$recompute_adjusted_pval){
+                res <- compute_additional_metrics(res,
+                                                  filterMetrics=attributes(enrichment_tables)$filterMetrics,
+                                                  filterGreaterLowerThans=attributes(enrichment_tables)$filterGreaterLowerThans,
+                                                  filterThresholds=attributes(enrichment_tables)$filterThresholds)
+            }
+            enrichment_tables[[sample_label]][[custom_ontology$name]] <- res
+        }
+    }
+    return(enrichment_tables)
+}
+    
+
+
 
 #' enrichment_tables should already contains 'pass_signif_tests' column to greatly reduce computational cost of this step as similiarity distance will only be computed on significant terms.
 #' Then metrics have to be computed again so postfilter doesnot ruin similarity selection.

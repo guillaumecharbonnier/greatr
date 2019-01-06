@@ -2,41 +2,62 @@
 #'
 #' @param enrichmentTables list of rGREAT outputs modified by add_additional_metrics function.
 #' @param outdir path for the tabulatated file containing result for all samples.
-#' @param clusterTermsBy string indicating a metric to use to cluster GO terms.
+#' @param clusterTermsBy string indicating a metric to use to cluster GO terms. If 'ontology_order' is given, terms will be displayed in their order in enrichmentTables.
 #' @param goLabels Specify if name (ex: immune response), ID (ex: GO:0006955) or both together are used for labels in heatmaps.
 #' @return melted dataframe to use with ggplot2
 #' @export
 prepare_data_for_heatmap2 <- function(enrichmentTables,
                                       outdir='.',
-                                      clusterTermsBy=NULL,
+                                      clusterTermsBy='ontology_order',
                                       goLabels=c('name','ID','ID-name')){
     # Here I should add Sample and Ontology as columns of each table
     for (sample in names(enrichmentTables)){
         for (ontology in names(enrichmentTables[[sample]])){
-            enrichmentTables[[sample]][[ontology]]$Sample <- sample
-            enrichmentTables[[sample]][[ontology]]$Ontology <- ontology
+            et <- enrichmentTables[[sample]][[ontology]]
+            et$Sample <- sample
+            et$Ontology <- ontology
+            et$uniqueId <- paste(et$Ontology, et$ID, et$name, sep='_')
+            # setting default order
+            #et$uniqueId <- factor(x=et$uniqueId, levels=et$uniqueId[1:nrow(et)], labels=et$uniqueId)
+            # reverse order seems to be better as ids will be displayed in the order of the ontology:
+            et$uniqueId <- factor(x=et$uniqueId, levels=rev(et$uniqueId[1:nrow(et)]))
+
+            if (goLabels == 'ID-name'){
+                et$label <- paste(et$ID, et$name)
+            } else {
+                et$label <- et[,goLabels]
+            }
+
+            # Using factor levels is not enough to ensure row orders in heatmap because some label are shared by multiple ontologies where their order is different.
+            # Thus, label_order store the order of the label for a given ontology and is used during plotting.
+            # See: https://stackoverflow.com/questions/42112100/ggplot-facet-wrap-with-specific-order-of-variables-in-each-facet
+            #et$label_order <- 1:nrow(et)
+            #et$label <- factor(x=et$uniqueId,
+            #                   levels=et$uniqueId[1:nrow(et)],
+            #                   labels=et$label)
+            enrichmentTables[[sample]][[ontology]] <- et
+            ### NOTE TODO:
+            ## EVEN WITH THAT IDs ARE displayed alphabetically and not with factor order,
+            # go back here and debug.
+            # 
+
         }
     }
-
+    # check if this call ruin label factor levels:
     d <- do.call(Map, c(f=rbind, enrichmentTables))
     d <- do.call(rbind, d)
-    #browser()
-
     # Command below will fail if '.' is containained in ontology name (which is the case for similarity-filtered ones).
     # That
     #splitted_rownames <- matrix(unlist(strsplit(x=rownames(d), split='.', fixed=TRUE)), ncol=3, byrow=TRUE)
-
     #colnames(splitted_rownames) <- c('Ontology', 'Sample','Index')
     #d <- cbind(splitted_rownames, d)
     rownames(d) <- NULL
     #d$Sample <- as.character(d$Sample)
-    
     # Add n_query_size to sample name
     for (sample in unique(d$Sample)){
         d$Sample[d$Sample == sample] <- paste0(sample, ' (', attributes(enrichmentTables[[sample]])$n_queried_regions,')')
     }
     
-    d$uniqueId <- paste(d$Ontology, d$ID, d$name, sep='_')
     
     # Add pass_test info
     pass_tests_for_all_samples <- reshape2::dcast(d, uniqueId ~ Sample, value.var = "pass_tests")
@@ -66,23 +87,17 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
 
     write.table(x=d, file=file.path(outdir,'table_all.tsv'), sep='\t', row.names=FALSE)
 
-    if (goLabels == 'ID-name'){
-        d$label <- paste(d$ID, d$name)
-    } else {
-        d$label <- d[,goLabels]
-    }
-
     # Maybe try fastcluster here because hclust find the data too big.
     # Also clusters ontologies separately first to reduce memory footprint.
-    if(!is.null(clusterTermsBy)){
+    if (clusterTermsBy != 'ontology_order'){
         tmp <- reshape2::dcast(d, uniqueId ~ Sample, value.var = clusterTermsBy)
         
         hclust_GOterms <- hclust(dist(tmp[,2:ncol(tmp)],
                                       method = "euclidean"),
                                  method = "ward.D" )
-        d$label <- factor(x=d$uniqueId,
-                          levels=d$uniqueId[hclust_GOterms$order],
-                          labels=d$label)
+        d$uniqueId <- factor(x=d$uniqueId,
+                          levels=tmp$uniqueId[hclust_GOterms$order],
+                          labels=tmp$uniqueId[hclust_GOterms$order])
     }
 
     id_vars <- c("Sample","ID","name","Ontology",

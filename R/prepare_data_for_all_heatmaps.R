@@ -159,7 +159,7 @@ prepare_data_for_heatmap <- function(enrichmentTables,
     filterThresholds <- as.numeric(filterThresholds)
     goLabels <- match.arg(goLabels) # Default to the first one.
     data_for_heatmap <- enrichmentTables[[1]][[ontology]]
-    browser()
+    #browser()
     print(paste("debug data_for_heatmap", str(data_for_heatmap)))
     col_to_remove_after_merge <- colnames(data_for_heatmap)
 

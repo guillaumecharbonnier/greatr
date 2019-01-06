@@ -19,7 +19,7 @@ Options:
     -m <filterMetrics>            Comma-separated list of metrics to use for filtering. Defaults try to match GREAT default settings. See together <filterGreaterLowerThans> and <filterThresholds>. [default: Binom_Fold_Enrichment,Binom_Adjp_BH,Hyper_Adjp_BH]
     -s <filterGreaterLowerThans>  Vector of 'lower' or 'greater' to apply fiterThresholds values to filterMetrics. [default: greater,lower,lower]
     -t <filterThresholds>         Vector of thresholds to apply to filterMetrics. Values matching threshold are kept, i.e. '<=' and '>=' are used for comparison. [default: 2,0.05,0.05]
-    -l <slimList>                 An optional one-column txt file or yaml file containing IDs to limit analysis for each ontology in order to keep output readable and non-redundant. Defaults use GO Slim Generic (http://www.geneontology.org). See slimList.yaml in <outdir> after each greatr run for template.
+    -l <slimList>                 An optional yaml file containing IDs to limit analysis for each ontology in order to keep output readable and non-redundant. Defaults use GO Slim Generic (http://www.geneontology.org). See slimList.yaml in <outdir> after each greatr run for template.
     -y <yaml>                     An optional yaml file that could store all settings above. See conf.yaml produced in outdir after each greatr run.
 " -> doc
 
@@ -28,26 +28,31 @@ Options:
 # -----------------------------------------------------------------------------
 library(docopt)
 opts <- docopt(doc)
+print(opts)
 library(yaml)
+
 if (!is.null(opts$y)){
-    print('Using yaml for conf')
-    tmp_yaml <- opts$y
-    opts <- read_yaml(file=opts$y)
-    opts$y <- tmp_yaml
+    print('Using input yaml for conf')
+    yaml <- read_yaml(file=opts$y)
+} else if (file.exists(file.path(opts$o, 'conf.yaml'))) {
+    print('Using yaml in outdir for conf')
+    yaml <- read_yaml(file=file.path(opts$o, 'conf.yaml'))
 } else {
     print('Using args for conf')
-    # Currently not sure if these conversions should also be done when yaml is read as conf.
-    opts$m <- unlist(strsplit(x=opts$m, split=','))
-    opts$s <- unlist(strsplit(x=opts$s, split=','))
-    opts$t <- as.numeric(unlist(strsplit(x=opts$t, split=',')))
+    yaml <- list()
+    yaml$args$filterMetrics <- unlist(strsplit(x=opts$m, split=','))
+    yaml$args$filterGreaterLowerThans <- unlist(strsplit(x=opts$s, split=','))
+    yaml$args$filterThresholds <- as.numeric(unlist(strsplit(x=opts$t, split=',')))
 }
-print(opts)
 
 ## -----------------------------------------------------------------------------
 ## Function calling
 ## -----------------------------------------------------------------------------
+yaml$meta$last_modified <- date()
 
-yaml::write_yaml(opts, file=file.path(opts$o, 'conf.yaml'))
+print(yaml)
+yaml_path <- file.path(opts$o, 'conf.yaml')
+yaml::write_yaml(yaml, file=yaml_path)
 library(greatr)
 greatr::run_pipeline(indir=opts$i,
                      files=opts$f,
@@ -56,8 +61,9 @@ greatr::run_pipeline(indir=opts$i,
                      assembly=opts$a,
                      collapseSamples=opts$c,
                      subsampleReplicates=opts$r,
-                     filterMetrics=opts$m,
-                     filterGreaterLowerThans=opts$s,
-                     filterThresholds=opts$t,
-                     slimList=opts$l)
+                     filterMetrics=yaml$args$filterMetrics,
+                     filterGreaterLowerThans=yaml$args$filterGreaterLowerThans,
+                     filterThresholds=yaml$args$filterThresholds,
+                     slimList=opts$l,
+                     yaml=yaml_path)
 

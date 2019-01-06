@@ -28,8 +28,14 @@ plot_melted_data2 <- function(melted,
     height_bottom <- 0.2 + 0.15 * n_char_samples
     height <- height_top + height_heatmap + height_bottom 
     
-    p <- ggplot2::ggplot(data = melted, ggplot2::aes(x = Sample, y = label))
-    p <- p + ggplot2::geom_tile(ggplot2::aes(fill = scaled))
+    #p <- ggplot2::ggplot(data = melted, ggplot2::aes(x = Sample, y = label))
+    # Testing this, in conjunction with scale_y_discrete(breaks = d$uniqueId, labels = d$label)
+    #if( melted$Ontology == 'GO Biological Process; Similarity filtered (Best Binom Fold Enrichment; Wang 0.1) and manual reorder'){
+    #    browser()
+    #}
+    p <- ggplot2::ggplot(data = melted, ggplot2::aes(x = Sample, y = uniqueId, fill = scaled))
+    p <- p + ggplot2::geom_tile()
+    p <- p + ggplot2::scale_y_discrete(breaks=melted$uniqueId, labels=melted$label, position = 'right')
     p <- p + ggplot2::geom_text(ggplot2::aes(color = scaled,
                            label = round(value, 1),
                            fontface = ifelse(signif_hyper,
@@ -54,6 +60,9 @@ plot_melted_data2 <- function(melted,
                                      space="free_y",
                                      labeller = ggplot2::label_wrap_gen(22)) #With 16, Panther PATHWAY stay on 1 line. Used to be 12.
     }
+    #browser()
+    #p <- p + ylim(
+    #p <- p + ggplot2::scale_x_discrete(breaks = d$uniqueId, labels = d$label)
     #p <- p + scale_fill_gradient(low = "white", high = "darkblue", guide=FALSE)
     #p <- p + scale_color_gradient2(low = "black", mid="yellow", high = "white", midpoint=0.5, guide=FALSE)
     #p <- p + scale_fill_gradientn(colors=c('#C3C3C5','#ABABDA','#5B5BC8','#2121D8','#0000BE'),guide=FALSE)
@@ -68,7 +77,6 @@ plot_melted_data2 <- function(melted,
     #p <- p + scale_fill_brewer(palette = palette_name)
     p <- p + ggplot2::theme(axis.text.x  = ggplot2::element_text(angle=320, vjust=1, hjust=0),
                    legend.position = "bottom")
-    p <- p + ggplot2::scale_y_discrete(position = "right")
 
     #p <- p + scale_fill_gradientn(limits=quantile(dm,c(0.01,0.99)))
     p <- p + ggplot2::xlab('Samples')

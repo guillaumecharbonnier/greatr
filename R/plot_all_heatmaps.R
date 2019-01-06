@@ -64,6 +64,7 @@ plot_all_heatmaps <- function(d,
                                        'mlog10 Hyper BH PValue',
                                        'Binom Fold Enrichment'))
     metrics <- c(metrics_unique, metrics_groups)
+
     for (metrics_category in names(metrics)){
         for (ontologies_category in names(ontologies)){
             plot_melted_data2(melted = d[d$metric %in% metrics[[metrics_category]] & d$Ontology %in% ontologies[[ontologies_category]],],
