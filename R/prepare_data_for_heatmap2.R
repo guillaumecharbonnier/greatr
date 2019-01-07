@@ -84,9 +84,7 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
     tmp <- reshape2::melt(tmp, id.vars='uniqueId', value.name='Zscore_Binom_Fold_Enrichment', variable.name='Sample')
     tmp$'Zscore_Binom_Fold_Enrichment'[is.nan(tmp$'Zscore_Binom_Fold_Enrichment')] <- 0
     d <- merge(d,tmp)
-
-    write.table(x=d, file=file.path(outdir,'table_all.tsv'), sep='\t', row.names=FALSE)
-
+    
     # Maybe try fastcluster here because hclust find the data too big.
     # Also clusters ontologies separately first to reduce memory footprint.
     if (clusterTermsBy != 'ontology_order'){
@@ -100,6 +98,29 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
                           labels=tmp$uniqueId[hclust_GOterms$order])
     }
 
+    # Write tables
+    #outdir_tables <- file.path(outdir, 'tables')
+    #dir.create(outdir_tables, recursive=TRUE)
+    write.table(x=d,
+                file=file.path(outdir,'all.tsv'), 
+                sep='\t', 
+                row.names=FALSE)
+    for (metric in c('mlog10_Hyper_BH_PValue', 'Binom_Fold_Enrichment')){
+        for (ontology in unique(d$Ontology)){
+            dr <- reshape2::dcast(d[d$Ontology == ontology,], uniqueId ~ Sample, value.var = metric)
+            # Rows have to be reverted in order to match heatmap order:
+            dr <- dr[nrow(dr):1,]
+            write.table(x=dr,
+                        file=file.path(outdir,
+                                       make.names(paste0('ont_',
+                                              ontology,
+                                              '__met_',metric,
+                                              '.tsv'))),
+                        sep='\t',
+                        row.names=FALSE)
+        }
+    }
+    
     id_vars <- c("Sample","ID","name","Ontology",
                  #"Index",
                  "signif_binom","signif_hyper","pass_signif_tests", "pass_post_filter_tests","pass_tests","uniqueId","label")

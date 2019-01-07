@@ -60,14 +60,22 @@ run_pipeline <- function(indir='.',
     ets <- add_similarity_filtered_ontologies(ets)
 
     for (clusterTermsBy in c('ontology_order', 'Binom_Fold_Enrichment')){
-        outdir_multi <- paste0(outdir, '/clustermTermsBy-',clusterTermsBy)
-        dir.create(outdir_multi, recursive=T, showWarnings=F)
+        outdir_multi <- paste0(outdir,
+                               '/multiple_samples_clustermTermsBy_',
+                               clusterTermsBy)
+        outdir_multi_tables <- paste0(outdir_multi,
+                                     '/tables')
+        outdir_multi_heatmaps <- paste0(outdir_multi,
+                                        '/heatmaps')
+        dir.create(outdir_multi_tables, recursive=T, showWarnings=F)
+        dir.create(outdir_multi_heatmaps, recursive=T, showWarnings=F)
+
         data_for_heatmap2 <- prepare_data_for_heatmap2(enrichmentTables = ets,
-                                                       outdir=outdir_multi,
+                                                       outdir=outdir_multi_tables,
                                                        clusterTermsBy=clusterTermsBy,
                                                        goLabels='name')
         plot_all_heatmaps(d=data_for_heatmap2,
-                          outdir=outdir_multi,
+                          outdir=outdir_multi_heatmaps,
                           device='pdf')
     }
 

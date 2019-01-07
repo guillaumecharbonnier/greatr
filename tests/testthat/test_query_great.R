@@ -1,4 +1,4 @@
-## file.remove(list.files(pattern='*.(png|pdf)', recursive=TRUE)); build();test()
+## file.remove(list.files(pattern='*.(png|pdf|tsv)', recursive=TRUE)); build();test()
 #
 context('Test queries to GREAT')
 ###
@@ -152,13 +152,14 @@ context("Conversion to ggplot2 format")
 #          save(data_for_heatmap2, file='data_for_heatmap2.Rdata')
 #          expect_equal(1, 1)
 #})
-
+#
 #test_that("enrichment_table can be converted to ggplot2 format", {
 #          load('enrichment_tables_with_custom_ontologies.Rdata')
-#          data_for_heatmap2_hclust_zbfe <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_custom_ontologies,
-#                                                         clusterTermsBy="Zscore_Binom_Fold_Enrichment",
+#          data_for_heatmap2_hclust_bfe <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_custom_ontologies,
+#                                                         clusterTermsBy="Binom_Fold_Enrichment",
+#                                                         outdir='clusterBy_bfe_test',
 #                                                         goLabels='name')
-#          save(data_for_heatmap2_hclust_zbfe, file='data_for_heatmap2_hclust_zbfe.Rdata')
+#          #save(data_for_heatmap2_hclust_zbfe, file='data_for_heatmap2_hclust_zbfe.Rdata')
 #          expect_equal(1, 1)
 #})
 #
