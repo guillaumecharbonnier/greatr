@@ -9,40 +9,46 @@
 usage: greatr [-y <yaml> -i <indir> -f <files> -b background -o <outdir> -a <assembly> -l <slimList -r <subsampleReplicates> -c collapseSamples -m <filterMetrics> -s <filterGreaterLowerThans> -t <filterThresholds> -l <slimList] 
 
 Options:
-    -i <indir>                    Input directory. [default: .]
-    -f <files>                    Input sample bed files as comma-separated list. Combined with <indir>. If not provided, all bed files inside <indir> will be taken.
-    -b <background>               An optional additional bed file containing regions not found in <files> to add to the background model.
-    -o <outdir>                   Output directory. If enrichment_tables.Rdata is present from a previous or interrupted run, new input files will be appended and the processing of existing ones will be skipped. All plots will be redrawn. [default: .]
-    -a <assembly>                 Assembly (hg19,mm9,mm10, danRer7) [default: hg19]
-    -c <collapseSamples>          An optional commma-separated list of group of samples to merge for additional analysis. Samples from the same group should be semicolon-separeted, e.g. Group1Sample1;Group1Sample2,Group2Sample1.
-    -r <subsampleReplicates>      Number of replicates for subsampling, no subsampling if unspecified.
-    -m <filterMetrics>            Comma-separated list of metrics to use for filtering. Defaults try to match GREAT default settings. See together <filterGreaterLowerThans> and <filterThresholds>. [default: Binom_Fold_Enrichment,Binom_Adjp_BH,Hyper_Adjp_BH]
-    -s <filterGreaterLowerThans>  Vector of 'lower' or 'greater' to apply fiterThresholds values to filterMetrics. [default: greater,lower,lower]
-    -t <filterThresholds>         Vector of thresholds to apply to filterMetrics. Values matching threshold are kept, i.e. '<=' and '>=' are used for comparison. [default: 2,0.05,0.05]
-    -l <slimList>                 An optional yaml file containing IDs to limit analysis for each ontology in order to keep output readable and non-redundant. Defaults use GO Slim Generic (http://www.geneontology.org). See slimList.yaml in <outdir> after each greatr run for template.
-    -y <yaml>                     An optional yaml file that could store all settings above. See conf.yaml produced in outdir after each greatr run.
+    -i --indir <indir>                    Input directory. [default: .]
+    -f --files <files>                    Input sample bed files as comma-separated list. Combined with <indir>. If not provided, all bed files inside <indir> will be taken.
+    -b --background <background>               An optional additional bed file containing regions not found in <files> to add to the background model.
+    -o --outdir <outdir>                   Output directory. If enrichment_tables.Rdata is present from a previous or interrupted run, new input files will be appended and the processing of existing ones will be skipped. All plots will be redrawn. [default: .]
+    -a --assembly <assembly>                 Assembly (hg19,mm9,mm10, danRer7) [default: hg19]
+    -c --collapseSamples <collapseSamples>          An optional commma-separated list of group of samples to merge for additional analysis. Samples from the same group should be semicolon-separeted, e.g. Group1Sample1;Group1Sample2,Group2Sample1.
+    -r --subsampleReplicates <subsampleReplicates>      Number of replicates for subsampling, no subsampling if unspecified.
+    -m --filterMetrics <filterMetrics>            Comma-separated list of metrics to use for filtering. Defaults try to match GREAT default settings. See together <filterGreaterLowerThans> and <filterThresholds>. [default: Binom_Fold_Enrichment,Binom_Adjp_BH,Hyper_Adjp_BH]
+    -s --filterGreaterLowerThans <filterGreaterLowerThans>  Vector of 'lower' or 'greater' to apply fiterThresholds values to filterMetrics. [default: greater,lower,lower]
+    -t --filterThresholds <filterThresholds>         Vector of thresholds to apply to filterMetrics. Values matching threshold are kept, i.e. '<=' and '>=' are used for comparison. [default: 2,0.05,0.05]
+    -l --slimList <slimList>                 An optional yaml file containing IDs to limit analysis for each ontology in order to keep output readable and non-redundant. Defaults use GO Slim Generic (http://www.geneontology.org). See slimList.yaml in <outdir> after each greatr run for template.
+    -y --yaml <yaml>                     An optional yaml file that could store all settings above. See as example the output conf.yaml produced in outdir after each greatr run. The settings from command line are overwritten by those from the input yaml.
 " -> doc
 
 # -----------------------------------------------------------------------------
 # Arg parsing
 # -----------------------------------------------------------------------------
 library(docopt)
-opts <- docopt(doc)
-print(opts)
 library(yaml)
+   
+yaml <- list()
+yaml$args <- docopt(doc, strip_names=TRUE)
+# Removing args entries starting with the dash '-'
+yaml$args <- yaml$args[!grepl(pattern='^-', x=names(yaml$args))]
 
-if (!is.null(opts$y)){
+# settings from command line args are updated from the yaml file
+if (!is.null(yaml$args$yaml)){
     print('Using input yaml for conf')
-    yaml <- read_yaml(file=opts$y)
-} else if (file.exists(file.path(opts$o, 'conf.yaml'))) {
-    print('Using yaml in outdir for conf')
-    yaml <- read_yaml(file=file.path(opts$o, 'conf.yaml'))
-} else {
-    print('Using args for conf')
-    yaml <- list()
-    yaml$args$filterMetrics <- unlist(strsplit(x=opts$m, split=','))
-    yaml$args$filterGreaterLowerThans <- unlist(strsplit(x=opts$s, split=','))
-    yaml$args$filterThresholds <- as.numeric(unlist(strsplit(x=opts$t, split=',')))
+    yaml <- modifyList(yaml,
+                       read_yaml(file=yaml$args$yaml))
+}
+
+if (is.character(yaml$args$filterMetrics)){
+	yaml$args$filterMetrics <- unlist(strsplit(x=yaml$args$filterMetrics, split=','))
+}
+if (is.character(yaml$args$filterGreaterLowerThans)){
+	yaml$args$filterGreaterLowerThans <- unlist(strsplit(x=yaml$args$filterGreaterLowerThans, split=','))
+}
+if (is.character(yaml$args$filterThresholds)){
+	yaml$args$filterThresholds <- as.numeric(unlist(strsplit(x=yaml$args$filterThresholds, split=',')))
 }
 
 ## -----------------------------------------------------------------------------
@@ -51,19 +57,20 @@ if (!is.null(opts$y)){
 yaml$meta$last_modified <- date()
 
 print(yaml)
-yaml_path <- file.path(opts$o, 'conf.yaml')
+dir.create(yaml$args$outdir, showWarnings=FALSE, recursive=TRUE)
+yaml_path <- file.path(yaml$args$outdir, 'conf.yaml')
 yaml::write_yaml(yaml, file=yaml_path)
 library(greatr)
-greatr::run_pipeline(indir=opts$i,
-                     files=opts$f,
-                     background=opts$b,
-                     outdir=opts$o,
-                     assembly=opts$a,
-                     collapseSamples=opts$c,
-                     subsampleReplicates=opts$r,
+greatr::run_pipeline(indir=yaml$args$indir,
+                     files=yaml$args$files,
+                     background=yaml$args$background,
+                     outdir=yaml$args$outdir,
+                     assembly=yaml$args$assembly,
+                     collapseSamples=yaml$args$collapseSamples,
+                     subsampleReplicates=yaml$args$subsampleReplicates,
                      filterMetrics=yaml$args$filterMetrics,
                      filterGreaterLowerThans=yaml$args$filterGreaterLowerThans,
                      filterThresholds=yaml$args$filterThresholds,
-                     slimList=opts$l,
+                     slimList=yaml$args$slimList,
                      yaml=yaml_path)
 
