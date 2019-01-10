@@ -57,7 +57,8 @@ prepare_data_for_heatmap2 <- function(enrichmentTables,
     for (sample in unique(d$Sample)){
         d$Sample[d$Sample == sample] <- paste0(sample, ' (', attributes(enrichmentTables[[sample]])$n_queried_regions,')')
     }
-    
+    # We want to preserve the order of samples provided as input instead of alphabetical order
+    d$Sample <- factor(x=d$Sample, levels=unique(d$Sample))
     
     # Add pass_test info
     pass_tests_for_all_samples <- reshape2::dcast(d, uniqueId ~ Sample, value.var = "pass_tests")

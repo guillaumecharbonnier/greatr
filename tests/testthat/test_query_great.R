@@ -145,14 +145,14 @@ context("Additional metrics can be added to enrichment_tables")
 
 context("Conversion to ggplot2 format")
 
-#test_that("enrichment_table can be converted to ggplot2 format", {
-#          load('enrichment_tables_with_custom_ontologies.Rdata')
-#          data_for_heatmap2 <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_custom_ontologies,
-#                                                         goLabels='name')
-#          save(data_for_heatmap2, file='data_for_heatmap2.Rdata')
-#          expect_equal(1, 1)
-#})
-#
+test_that("enrichment_table can be converted to ggplot2 format", {
+          load('enrichment_tables_with_custom_ontologies.Rdata')
+          data_for_heatmap2 <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_custom_ontologies,
+                                                         goLabels='name')
+          save(data_for_heatmap2, file='data_for_heatmap2.Rdata')
+          expect_equal(1, 1)
+})
+
 #test_that("enrichment_table can be converted to ggplot2 format", {
 #          load('enrichment_tables_with_custom_ontologies.Rdata')
 #          data_for_heatmap2_hclust_bfe <- prepare_data_for_heatmap2(enrichmentTables = enrichment_tables_with_custom_ontologies,
