@@ -2,8 +2,8 @@
 #'
 #' @param beds A list of bed files loaded by load_bed function.
 #' @param outdir The output directory for plots and data.
-#' @param files A comma-separated list of filenames
-#' @param labels A comma-separated list of labels to use for filenames
+#' @param saveTables logical. If TRUE will save to file the enrichment_tables object containing results from queries
+#' @param loadTables logical. If TRUE will load previously saved enrichment_tables object if available
 #' @param assembly The genome assembly of the provided input files.
 #' @param ontologies The queried ontologies. All available ontologies are queried by default.
 #' @return enrichment_tables from GREAT.
@@ -27,7 +27,7 @@ query_great <- function(beds,
         # Avoid redoing analysis if already done and loaded from save file.
         if (!sample %in% names(enrichment_tables)){
             print(paste0('Running GREAT analysis for ',sample,'.'))
-            job <- rGREAT::submitGreatJob(beds[[sample]], species = assembly, request_interval=5)
+            job <- rGREAT::submitGreatJob(gr=beds[[sample]], species = assembly,  version = "3", request_interval=5)
             if (is.null(ontologies)){
                 ontologies <- rGREAT::availableOntologies(job)
             }

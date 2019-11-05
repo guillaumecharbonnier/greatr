@@ -45,8 +45,8 @@ run_pipeline <- function(indir='.',
     #enrichment_tables_with_slim <- add_slim_ontologies(enrichment_tables_for_collapsed_samples)
 
     #if (!is.null(slimList)){
-    ets <- add_custom_ontologies(ets,
-                                 yaml)
+    #ets <- add_custom_ontologies(ets,
+    #                             yaml)
     #} else {
     #    print('Write function to add template of yaml file to use here.')
     #    print('slimList.yaml')

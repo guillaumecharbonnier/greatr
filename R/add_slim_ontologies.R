@@ -6,14 +6,15 @@ add_slim_ontologies <- function(enrichment_tables,
                                 slimList=NULL){
     if (is.null(slimList)){
         print('No slim list provided, using goslim_generic instead')
-        slimList <- data(goslim_generic, package='greatr')
+        data(goslim_generic, package='greatr')
+        slimList <- goslim_generic
     } else  if (tools::file_ext(slimList) == 'txt'){
         slimList <- scan(slimList, character(), quote = "")
     } else if (tools::file_ext(slimList) == 'yaml'){
         print('yaml as slimList is not implemented yet')
         slimList <- yaml::read_yaml(file=slimList)
     }
-
+    
     for (sample_label in names(enrichment_tables)){
         for (ontology in names(enrichment_tables[[sample_label]])){
             if (!grepl(pattern='^Slim ', x=ontology)){
