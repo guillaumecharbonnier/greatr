@@ -1,5 +1,5 @@
 Package: greatr
-Version: 0.1-1
+Version: 0.1-5
 Date: 2018-09-25 23:10:58
 Title: GREATR: multi-samples analysis of cis-regulatory regions.
 Authors@R: c(person("Guillaume", "Charbonnier", role = c("aut", "cre"),
